@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from '../contexts/HistoryContext';
 import { transcriptionAPI } from '../services/api';
+import '../styles/sidebar.css'; // Add this import
 
 const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();

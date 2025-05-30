@@ -1,0 +1,380 @@
+/* Mobile Base Layout */
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+    
+    .App {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 80px;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        margin: 0;
+    }
+
+    .App-header {
+        padding: 24px 20px;
+        border-radius: 16px;
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Typography */
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Components */
+    .upload-container,
+    .transcription-controls,
+    .progress {
+        margin: 1.5rem 0;
+    }
+
+    .file-input-button,
+    .transcribe-btn {
+        padding: 14px 24px;
+        font-size: 0.95rem;
+        gap: 8px;
+        min-height: 56px;
+    }
+
+    .download-btn {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        min-height: 48px;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .file-info {
+        margin-top: 1rem;
+        padding: 16px;
+    }
+
+    .progress p {
+        font-size: 1rem;
+    }
+
+    .error,
+    .result {
+        margin: 1.5rem 0;
+        padding: 20px;
+    }
+
+    .result h3 {
+        font-size: 1.3rem;
+    }
+
+    .result p {
+        margin-bottom: 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    /* Sidebar */
+    .history-trigger {
+        top: 15px;
+        right: 15px;
+        position: fixed;
+        z-index: 1000;
+    }
+
+    .history-trigger-btn {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+
+    .history-sidebar {
+        width: 100vw;
+        max-width: 100vw;
+        border-left: none;
+        left: 0;
+        right: 0;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+    }
+
+    .sidebar-title h3 {
+        font-size: 1.1rem;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .sidebar-empty {
+        padding: 40px 20px;
+    }
+
+    .sidebar-history-item {
+        margin: 0 10px 6px 10px;
+    }
+
+    .item-content {
+        padding: 14px;
+    }
+
+    /* Disable hover effects */
+    .file-input-button:hover,
+    .transcribe-btn:hover,
+    .download-btn:hover,
+    .history-trigger-btn:hover,
+    .clear-all-btn:hover,
+    .close-sidebar-btn:hover,
+    .sidebar-download-btn:hover,
+    .sidebar-remove-btn:hover,
+    .sidebar-history-item:hover {
+        transform: none !important;
+        box-shadow: initial !important;
+    }
+
+    .transcribe-btn:hover::before {
+        left: -100%;
+    }
+
+    .file-input-wrapper.drag-over .file-input-button {
+        transform: none;
+    }
+
+    /* Touch-friendly styles */
+    button:focus,
+    input:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    button,
+    .file-input-wrapper,
+    .sidebar-history-item {
+        -webkit-tap-highlight-color: rgba(102, 126, 234, 0.1);
+    }
+
+    input[type="file"] {
+        font-size: 16px;
+    }
+
+    body {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .result {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .App-header {
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .upload-container,
+    .transcription-controls,
+    .progress {
+        margin: 1rem 0;
+    }
+
+    .file-input-button,
+    .transcribe-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        min-height: 52px;
+        border-radius: 10px;
+    }
+
+    .download-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+
+    .file-info {
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .file-info p {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .file-info audio {
+        height: 36px;
+        border-radius: 6px;
+    }
+
+    .progress p {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 2px;
+    }
+
+    .error,
+    .result {
+        margin: 1rem 0;
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .error p {
+        font-size: 0.9rem;
+    }
+
+    .result h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .result p {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Sidebar */
+    .history-trigger {
+        top: 12px;
+        right: max(12px, env(safe-area-inset-right));
+    }
+
+    .history-trigger-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
+    .history-sidebar {
+        width: 100vw;
+        max-width: none;
+    }
+
+    .sidebar-header {
+        padding: 16px;
+    }
+
+    .sidebar-title {
+        gap: 8px;
+    }
+
+    .sidebar-title h3 {
+        font-size: 1rem;
+    }
+
+    .history-count {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .sidebar-actions {
+        gap: 6px;
+    }
+
+    .clear-all-btn,
+    .close-sidebar-btn {
+        padding: 6px;
+        border-radius: 6px;
+    }
+
+    .sidebar-empty {
+        padding: 30px 16px;
+    }
+
+    .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .sidebar-empty p {
+        font-size: 1rem;
+    }
+
+    .sidebar-empty span {
+        font-size: 0.85rem;
+    }
+
+    .history-items {
+        padding: 8px 0;
+    }
+
+    .sidebar-history-item {
+        margin: 0 8px 6px 8px;
+        border-radius: 8px;
+    }
+
+    .item-content {
+        padding: 12px;
+    }
+
+    .item-header {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .item-icon {
+        font-size: 1rem;
+        margin-top: 1px;
+    }
+
+    .item-title {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    .item-meta {
+        gap: 2px;
+    }
+
+    .meta-item {
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+
+    .item-actions {
+        gap: 6px;
+    }
+
+    .sidebar-download-btn,
+    .sidebar-remove-btn {
+        padding: 6px;
+        border-radius: 4px;
+    }
+}
