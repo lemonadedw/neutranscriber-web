@@ -17,6 +17,8 @@ module.exports = {
         'shake': 'shake 0.5s ease-in-out',
         'pulse-success': 'successPulse 0.6s ease-out',
         'slide-in-from-right': 'slideInFromRight 0.4s ease-out',
+        'slide-in-from-bottom-4': 'slideInFromBottom 0.5s ease-out',
+        'in': 'slideIn 0.5s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -25,6 +27,10 @@ module.exports = {
         },
         slideIn: {
           '0%': { opacity: '0', transform: 'translateY(30px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        slideInFromBottom: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
         },
         scaleIn: {
@@ -61,4 +67,3 @@ module.exports = {
     require('tailwind-scrollbar'),
   ],
 }
-
