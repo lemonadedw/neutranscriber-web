@@ -49,11 +49,11 @@ const TranscriptionHistory = () => {
 
   return (
     <>
-      {/* History Toggle Button - Always show */}
-      <div className="history-trigger">
+      {/* History Toggle Button - Fixed positioning */}
+      <div className="fixed top-5 right-5 z-50">
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="history-trigger-btn"
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none py-3 px-4 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/30 backdrop-blur-sm border border-white/20 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/40 active:transform active:translate-y-0"
           title="View transcription history"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -65,22 +65,24 @@ const TranscriptionHistory = () => {
 
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={closeSidebar}>
-          <div className="history-sidebar" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 animate-fade-in" onClick={closeSidebar}>
+          <div className="absolute top-0 right-0 w-[420px] h-full bg-white/95 backdrop-blur-xl border-l border-white/30 shadow-2xl flex flex-col animate-slide-in-from-right" onClick={(e) => e.stopPropagation()}>
             {/* Sidebar Header */}
-            <div className="sidebar-header">
-              <div className="sidebar-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <div className="p-6 border-b border-white/30 flex items-center justify-between bg-white/80">
+              <div className="flex items-center gap-3 flex-1">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-indigo-500">
                   <path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
                 </svg>
-                <h3>Transcription History</h3>
-                <span className="history-count">{history.length}</span>
+                <h3 className="text-xl font-bold text-gray-800 m-0">Transcription History</h3>
+                <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-1 px-2.5 rounded-xl text-xs font-semibold">
+                  {history.length}
+                </span>
               </div>
-              <div className="sidebar-actions">
+              <div className="flex gap-2">
                 {history.length > 0 && (
                   <button
                     onClick={handleClearHistory}
-                    className="clear-all-btn"
+                    className="p-2 border-none rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-100 hover:scale-110"
                     title="Clear all history"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -90,7 +92,7 @@ const TranscriptionHistory = () => {
                 )}
                 <button
                   onClick={closeSidebar}
-                  className="close-sidebar-btn"
+                  className="p-2 border-none rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-110"
                   title="Close sidebar"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -101,43 +103,43 @@ const TranscriptionHistory = () => {
             </div>
 
             {/* Sidebar Content */}
-            <div className="sidebar-content">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-white/10">
               {history.length === 0 ? (
-                <div className="sidebar-empty">
-                  <div className="empty-icon">📝</div>
-                  <p>No transcriptions yet</p>
-                  <span>Your completed transcriptions will appear here</span>
+                <div className="flex flex-col items-center justify-center p-15 text-center text-gray-600">
+                  <div className="text-5xl mb-4 opacity-70">📝</div>
+                  <p className="text-lg font-semibold mb-2">No transcriptions yet</p>
+                  <span className="text-sm opacity-80">Your completed transcriptions will appear here</span>
                 </div>
               ) : (
-                <div className="history-items">
+                <div className="py-3">
                   {history.map((item, index) => (
                     <div 
                       key={item.id} 
-                      className="sidebar-history-item"
+                      className="mx-3 mb-2 bg-white/70 rounded-xl border border-white/30 transition-all duration-300 animate-slide-in-from-right hover:bg-white/90 hover:transform hover:-translate-x-1 hover:shadow-lg"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
-                      <div className="item-content">
-                        <div className="item-header">
-                          <div className="item-icon">🎵</div>
-                          <div className="item-info">
-                            <h4 className="item-title" title={item.fileName}>
+                      <div className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="text-xl mt-0.5">🎵</div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-semibold text-gray-800 m-0 mb-2 whitespace-nowrap overflow-hidden text-ellipsis" title={item.fileName}>
                               {item.fileName}
                             </h4>
-                            <div className="item-meta">
-                              <span className="meta-item">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <div className="flex flex-col gap-1">
+                              <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="opacity-60">
                                   <path d="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z" />
                                 </svg>
                                 {formatDate(item.timestamp)}
                               </span>
-                              <span className="meta-item">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                              <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="opacity-60">
                                   <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z" />
                                 </svg>
                                 {formatFileSize(item.fileSize)}
                               </span>
-                              <span className="meta-item">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                              <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="opacity-60">
                                   <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
                                 </svg>
                                 {item.processingTime}s
@@ -145,10 +147,10 @@ const TranscriptionHistory = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="item-actions">
+                        <div className="flex gap-2 justify-end">
                           <button
                             onClick={() => handleDownload(item.midiFilename, item.fileName)}
-                            className="sidebar-download-btn"
+                            className="p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/40"
                             title="Download MIDI file"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -157,7 +159,7 @@ const TranscriptionHistory = () => {
                           </button>
                           <button
                             onClick={() => handleRemoveItem(item.id, item.fileName)}
-                            className="sidebar-remove-btn"
+                            className="p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-100 hover:transform hover:-translate-y-1"
                             title="Remove from history"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

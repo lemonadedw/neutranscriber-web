@@ -1,5 +1,5 @@
 {
-  "name": "neutranscriptor-web",
+  "name": "neutranscriber-web",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -31,5 +31,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.4",
+    "tailwind-scrollbar": "^3.1.0",
+    "tailwindcss": "^3.4.17"
   }
 }
