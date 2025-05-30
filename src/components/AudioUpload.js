@@ -37,9 +37,9 @@ const AudioUpload = ({ onFileSelect, disabled }) => {
 
   return (
     <div className="my-8">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-600">Upload Audio for Piano Transcription</h2>
-      
-      <div 
+      <h2 className="text-2xl font-semibold mb-6 text-gray-600">Upload Solo Piano Audio for Transcription</h2>
+
+      <div
         className={`relative inline-block cursor-pointer w-full transition-all duration-300 ${
           isDragOver ? 'scale-105' : ''
         }`}

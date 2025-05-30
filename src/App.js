@@ -4,7 +4,6 @@ import TranscriptionHistory from './components/TranscriptionHistory';
 import { useTranscription } from './hooks/useTranscription';
 import { useHistory } from './contexts/HistoryContext';
 import { transcriptionAPI } from './services/api';
-import './App.css'; // All styles are now imported through App.css
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -13,6 +12,8 @@ function App() {
 
   const handleFileSelect = (file) => {
     setSelectedFile(file);
+    // Reset any previous transcription state when a new file is selected
+    resetTranscription();
   };
 
   const handleStartTranscription = () => {
@@ -47,7 +48,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 flex items-center justify-center p-5 font-inter">
       <TranscriptionHistory />
-      
+
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-10 shadow-2xl border border-white/20 max-w-2xl w-full text-center animate-slide-in">
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent mb-8">
           🎵 NeuTranscriber
@@ -58,7 +59,8 @@ function App() {
           disabled={isTranscribing}
         />
 
-        {selectedFile && !isTranscribing && !result && (
+        {/* Show transcribe button when file is selected and not currently transcribing and no error */}
+        {selectedFile && !isTranscribing && !error && !result && (
           <div className="my-8 animate-scale-in">
             <button
               onClick={handleStartTranscription}
@@ -80,12 +82,18 @@ function App() {
         {error && (
           <div className="my-8 p-4 bg-red-50 border border-red-200 rounded-xl animate-shake">
             <p className="text-red-600 font-medium mb-3">❌ {error}</p>
-            <button
-              onClick={handleStartOver}
-              className="bg-transparent border border-red-500 text-red-500 py-2 px-4 rounded-lg transition-all duration-300 hover:bg-red-50 cursor-pointer min-h-[44px] w-full sm:w-auto"
-            >
-              Try Again
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {selectedFile && (
+                <button
+                  onClick={() => {
+                    resetTranscription();
+                  }}
+                  className="bg-transparent border border-red-500 text-red-500 py-2 px-4 rounded-lg transition-all duration-300 hover:bg-red-50 cursor-pointer min-h-[44px] w-full sm:w-auto"
+                >
+                  Retry Transcription
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -94,8 +102,8 @@ function App() {
             <h3 className="text-gray-800 text-2xl font-semibold mb-4">🎉 Transcription Complete!</h3>
             <p className="text-gray-600 mb-6 text-base">⏱️ Processing time: {result.transcription_time} seconds</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button 
-                onClick={handleDownload} 
+              <button
+                onClick={handleDownload}
                 className="bg-gradient-to-r from-purple-500 to-purple-700 text-white border-none py-3.5 px-7 text-base font-semibold rounded-xl cursor-pointer transition-all duration-300 shadow-lg shadow-purple-500/30 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/40 active:transform active:translate-y-0 inline-flex items-center justify-center gap-2 min-h-[48px] w-full sm:w-auto"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

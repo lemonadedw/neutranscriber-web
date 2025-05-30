@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from '../contexts/HistoryContext';
 import { transcriptionAPI } from '../services/api';
-import '../styles/sidebar.css'; // Add this import
 
 const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();
@@ -114,8 +113,8 @@ const TranscriptionHistory = () => {
               ) : (
                 <div className="py-3">
                   {history.map((item, index) => (
-                    <div 
-                      key={item.id} 
+                    <div
+                      key={item.id}
                       className="mx-3 mb-2 bg-white/70 rounded-xl border border-white/30 transition-all duration-300 animate-slide-in-from-right hover:bg-white/90 hover:transform hover:-translate-x-1 hover:shadow-lg"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
