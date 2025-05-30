@@ -74,7 +74,7 @@ function App() {
               <span className="text-slate-700">Transcriber</span>
             </h1>
             <p className="text-xl sm:text-2xl text-slate-600 font-medium">
-              Transform your piano audio into professional MIDI files
+              Transform your piano recordings into MIDI files
             </p>
             <div className="flex items-center justify-center gap-2 mt-4">
               <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
@@ -102,7 +102,7 @@ function App() {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
-                    <span>Start AI Transcription</span>
+                    <span>Start Transcription</span>
                     <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                   </div>
                 </button>
@@ -211,7 +211,7 @@ function App() {
 
           {/* Footer */}
           <div className="text-center mt-8 text-slate-500">
-            <p className="text-sm">Powered by advanced AI music transcription technology</p>
+            <p className="text-sm">Created by Henry B. W.</p>
           </div>
         </div>
       </div>
