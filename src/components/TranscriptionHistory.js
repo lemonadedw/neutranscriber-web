@@ -153,7 +153,7 @@ const TranscriptionHistory = () => {
                         <div className="flex gap-1.5 sm:gap-2 justify-end">
                           <button
                             onClick={() => handleDownload(item.midiFilename, item.fileName)}
-                            className="p-1.5 sm:p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/40"
+                            className="p-1.5 sm:p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/40"
                             title="Download MIDI file"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="sm:w-4 sm:h-4">

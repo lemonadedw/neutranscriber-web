@@ -92,7 +92,7 @@ function App() {
 
             {/* Transcribe Button */}
             {selectedFile && !isTranscribing && !error && !result && (
-              <div className="mt-8 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
                 <button
                   onClick={handleStartTranscription}
                   className="group relative w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/25 active:scale-[0.98] overflow-hidden"
@@ -111,7 +111,7 @@ function App() {
 
             {/* Loading State */}
             {isTranscribing && (
-              <div className="mt-8 text-center animate-in fade-in duration-500">
+              <div className="mt-4 text-center animate-in fade-in duration-500">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 relative">
                   <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -129,7 +129,7 @@ function App() {
 
             {/* Error State */}
             {error && (
-              <div className="mt-8 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                     <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@ function App() {
 
             {/* Success State */}
             {result && result.status === 'SUCCESS' && (
-              <div className="mt-8 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-3xl p-8 text-center relative overflow-hidden">
                   {/* Success Background Pattern */}
                   <div className="absolute inset-0 opacity-10">
