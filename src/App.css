@@ -3,191 +3,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Combined Component Styles */
 @layer components {
-  /* Gradient Button Base */
-  .btn-gradient-base {
+
+  /* Button Components */
+  .btn-base {
     @apply font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 relative overflow-hidden;
   }
-  
-  /* Primary Action Button */
+
   .btn-primary {
-    @apply btn-gradient-base bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl hover:shadow-emerald-500/25 active:scale-98;
+    @apply btn-base bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl hover:shadow-emerald-500/25;
   }
-  
-  /* Secondary Action Button */
+
   .btn-secondary {
-    @apply btn-gradient-base bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/25;
+    @apply btn-base bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/25;
   }
-  
-  /* Danger Button */
-  .btn-danger {
-    @apply btn-gradient-base bg-red-50 text-red-500 hover:bg-red-100 border border-red-200;
-  }
-  
-  /* Icon Button Base */
+
   .btn-icon {
     @apply p-2 border-none rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center hover:scale-110;
   }
-  
-  /* History Button */
-  .btn-history {
-    @apply bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none py-2 px-3 lg:py-3 lg:px-4 rounded-xl text-xs lg:text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-1.5 lg:gap-2 shadow-lg shadow-indigo-500/30 backdrop-blur-sm border border-white/20 hover:transform hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/40 active:transform active:translate-y-0;
-  }
-  
-  /* Card Base */
-  .card-base {
+
+  /* Card Components */
+  .card-glass {
     @apply bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 transition-all duration-300;
   }
-  
-  /* Sidebar Card */
-  .card-sidebar {
-    @apply bg-white/70 rounded-lg sm:rounded-xl border border-white/30 transition-all duration-300 hover:bg-white/90 hover:transform hover:-translate-x-1 hover:shadow-lg;
-  }
-  
-  /* Upload Zone Base */
+
+  /* Upload Zone */
   .upload-zone {
     @apply border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300 cursor-pointer hover:shadow-lg;
   }
-  
-  /* Upload Zone States */
-  .upload-zone-default {
-    @apply upload-zone border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50;
-  }
-  
-  .upload-zone-dragover {
-    @apply upload-zone border-emerald-400 bg-emerald-50 scale-105;
-  }
-  
-  .upload-zone-selected {
-    @apply upload-zone border-blue-300 bg-blue-50;
-  }
-  
-  /* Icon Circle Base */
-  .icon-circle {
-    @apply w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300;
-  }
-  
-  .icon-circle-lg {
-    @apply w-16 h-16 rounded-full flex items-center justify-center;
-  }
-  
-  .icon-circle-xl {
-    @apply w-20 h-20 rounded-full flex items-center justify-center;
-  }
-  
-  /* Status States */
+
+  /* Status Components */
   .status-success {
     @apply bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-3xl p-8 text-center relative overflow-hidden;
   }
-  
+
   .status-error {
     @apply bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center;
   }
-  
-  .status-loading {
-    @apply text-center;
-  }
-  
-  /* Responsive Text */
-  .text-responsive-sm {
-    @apply text-xs sm:text-sm;
-  }
-  
-  .text-responsive-base {
-    @apply text-sm sm:text-base;
-  }
-  
-  .text-responsive-lg {
-    @apply text-lg sm:text-xl;
-  }
-  
-  /* Responsive Spacing */
-  .spacing-responsive {
-    @apply p-3 sm:p-4;
-  }
-  
-  .spacing-responsive-lg {
-    @apply p-4 sm:p-5 lg:p-6;
-  }
-  
-  /* Animation Helpers */
+
+  /* Utilities */
   .animate-slide-up {
     @apply animate-in slide-in-from-bottom-4 duration-500;
   }
-  
-  .animate-fade {
-    @apply animate-in fade-in duration-500;
-  }
-  
-  /* Scrollbar Styling */
+
   .scrollbar-custom {
     @apply scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-white/10;
   }
-  
-  /* Background Patterns */
-  .bg-pattern-grid {
-    background-image: linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-  
-  /* Glassmorphism Effect */
-  .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/30;
-  }
-  
-  .glass-strong {
-    @apply bg-white/95 backdrop-blur-xl border border-white/30;
-  }
-  
-  /* Hover Effects */
-  .hover-lift {
-    @apply transition-transform duration-300 hover:transform hover:-translate-y-1;
-  }
-  
-  .hover-scale {
-    @apply transition-transform duration-300 hover:scale-105;
-  }
-  
-  /* Shimmer Effect */
-  .shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .shimmer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.7s;
-  }
-  
-  .shimmer:hover::before {
-    left: 100%;
-  }
 }
 
-/* Custom Utilities */
 @layer utilities {
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
   .active\:scale-98:active {
     transform: scale(0.98);
-  }
-  
-  /* Safe area for mobile devices */
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
   }
 }

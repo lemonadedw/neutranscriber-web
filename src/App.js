@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import AudioUpload from './components/AudioUpload';
 import TranscriptionHistory from './components/TranscriptionHistory';
+import ServerSelector from './components/ServerSelector';
 import { useTranscription } from './hooks/useTranscription';
 import { useHistory } from './contexts/HistoryContext';
-import { transcriptionAPI } from './services/api';
+import { transcriptionAPI, updateApiBaseURL } from './services/api';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedServer, setSelectedServer] = useState({
+    id: 'localhost',
+    name: 'Local Server',
+    url: 'http://localhost:9000',
+    healthUrl: 'http://localhost:9000/api/health',
+    status: 'checking'
+  });
+
   const { transcribeAudio, resetTranscription, isTranscribing, progress, result, error } = useTranscription();
   const { addTranscription } = useHistory();
 
@@ -16,9 +25,19 @@ function App() {
     resetTranscription();
   };
 
+  const handleServerSelect = (server) => {
+    setSelectedServer(server);
+    updateApiBaseURL(server.url);
+    // Reset transcription state when server changes
+    resetTranscription();
+    // Note: We keep the selectedFile so user doesn't need to re-upload
+  };
+
   const handleStartTranscription = () => {
-    if (selectedFile) {
+    if (selectedFile && selectedServer.status === 'online') {
       transcribeAudio(selectedFile);
+    } else if (selectedServer.status !== 'online') {
+      alert('Please select an online server before starting transcription.');
     }
   };
 
@@ -33,6 +52,11 @@ function App() {
     setSelectedFile(null);
     resetTranscription();
   };
+
+  // Initialize API base URL on component mount
+  useEffect(() => {
+    updateApiBaseURL(selectedServer.url);
+  }, []);
 
   // Add successful transcription to history
   useEffect(() => {
@@ -53,13 +77,17 @@ function App() {
         <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
             <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgb(99 102 241)" strokeWidth="0.5" opacity="0.3"/>
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgb(99 102 241)" strokeWidth="0.5" opacity="0.3" />
             </pattern>
           </defs>
           <rect width="100" height="100" fill="url(#grid)" />
         </svg>
       </div>
 
+      <ServerSelector
+        onServerSelect={handleServerSelect}
+        selectedServer={selectedServer}
+      />
       <TranscriptionHistory />
 
       {/* Main Container */}
@@ -81,6 +109,20 @@ function App() {
               <div className="h-1 w-6 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full opacity-60"></div>
               <div className="h-1 w-3 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full opacity-30"></div>
             </div>
+
+            {/* Server Status Indicator */}
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm">
+              <span className="text-slate-600">Connected to:</span>
+              <div className="flex items-center gap-2 bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
+                <div className={`w-2 h-2 rounded-full ${selectedServer.status === 'online'
+                  ? 'bg-green-500 shadow-green-500/50'
+                  : selectedServer.status === 'checking'
+                    ? 'bg-yellow-500 shadow-yellow-500/50 animate-pulse'
+                    : 'bg-red-500 shadow-red-500/50'
+                  } shadow-lg`}></div>
+                <span className="font-medium text-slate-700">{selectedServer.name}</span>
+              </div>
+            </div>
           </div>
 
           {/* Main Card */}
@@ -88,11 +130,27 @@ function App() {
             <AudioUpload
               onFileSelect={handleFileSelect}
               disabled={isTranscribing}
+              selectedFile={selectedFile}
             />
 
+            {/* Server Offline Warning */}
+            {selectedFile && selectedServer.status !== 'online' && (
+              <div className="mt-6 bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-4 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full mb-3">
+                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-yellow-800 mb-1">Server Unavailable</h3>
+                <p className="text-yellow-700 text-sm">
+                  The selected server is not responding. Please choose an online server to start transcription.
+                </p>
+              </div>
+            )}
+
             {/* Transcribe Button */}
-            {selectedFile && !isTranscribing && !error && !result && (
-              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
+            {selectedFile && !isTranscribing && !error && !result && selectedServer.status === 'online' && (
+              <div className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
                 <button
                   onClick={handleStartTranscription}
                   className="group relative w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/25 active:scale-[0.98] overflow-hidden"
@@ -111,7 +169,7 @@ function App() {
 
             {/* Loading State */}
             {isTranscribing && (
-              <div className="mt-4 text-center animate-in fade-in duration-500">
+              <div className="mt-6 text-center animate-in fade-in duration-500">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 relative">
                   <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -129,7 +187,7 @@ function App() {
 
             {/* Error State */}
             {error && (
-              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                     <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +213,7 @@ function App() {
 
             {/* Success State */}
             {result && result.status === 'SUCCESS' && (
-              <div className="mt-4 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-3xl p-8 text-center relative overflow-hidden">
                   {/* Success Background Pattern */}
                   <div className="absolute inset-0 opacity-10">
@@ -175,7 +233,7 @@ function App() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    
+
                     <h3 className="text-3xl font-bold text-emerald-800 mb-2">🎉 Transcription Complete!</h3>
                     <p className="text-lg text-emerald-700 mb-8">
                       ⚡ Processed in {result.transcription_time} seconds
@@ -192,7 +250,7 @@ function App() {
                         <span>Download MIDI</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                       </button>
-                      
+
                       <button
                         onClick={handleStartOver}
                         className="inline-flex items-center justify-center gap-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105"

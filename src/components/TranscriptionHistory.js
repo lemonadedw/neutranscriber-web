@@ -1,55 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useHistory } from '../contexts/HistoryContext';
 import { transcriptionAPI } from '../services/api';
+
+// Utility functions
+const formatDate = (timestamp) => {
+  return new Date(timestamp).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatFileSize = (bytes) => {
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+};
 
 const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatFileSize = (bytes) => {
-    return (bytes / 1024 / 1024).toFixed(1) + ' MB';
-  };
-
-  const handleDownload = (midiFilename, fileName) => {
+  const handleDownload = useCallback((midiFilename, fileName) => {
     if (midiFilename) {
       const downloadUrl = transcriptionAPI.downloadMidi(midiFilename);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${fileName.replace('.mp3', '')}.mid`;
+      link.download = `${fileName.replace(/\.[^/.]+$/, '')}.mid`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
-  };
+  }, []);
 
-  const handleClearHistory = () => {
+  const handleClearHistory = useCallback(() => {
     if (window.confirm('Are you sure you want to clear all transcription history?')) {
       clearHistory();
     }
-  };
+  }, [clearHistory]);
 
-  const handleRemoveItem = (id, fileName) => {
+  const handleRemoveItem = useCallback((id, fileName) => {
     if (window.confirm(`Remove "${fileName}" from history?`)) {
       removeTranscription(id);
     }
-  };
+  }, [removeTranscription]);
 
-  const closeSidebar = () => {
+  const closeSidebar = useCallback(() => {
     setIsSidebarOpen(false);
-  };
+  }, []);
 
   return (
     <>
-      {/* History Toggle Button - Unified responsive positioning */}
+      {/* History Toggle Button */}
       <div className="fixed top-3 right-3 lg:top-5 lg:right-5 z-50">
         <button
           onClick={() => setIsSidebarOpen(true)}

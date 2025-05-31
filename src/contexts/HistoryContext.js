@@ -1,38 +1,55 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 
+const STORAGE_KEY = 'transcriptionHistory';
+
 const HistoryContext = createContext();
 
 const historyReducer = (state, action) => {
+  let newState;
+  
   switch (action.type) {
     case 'ADD_TRANSCRIPTION':
-      const newHistory = [action.payload, ...state];
-      localStorage.setItem('transcriptionHistory', JSON.stringify(newHistory));
-      return newHistory;
-    
+      newState = [action.payload, ...state];
+      break;
     case 'LOAD_HISTORY':
       return action.payload;
-    
     case 'CLEAR_HISTORY':
-      localStorage.removeItem('transcriptionHistory');
-      return [];
-    
+      newState = [];
+      break;
     case 'REMOVE_TRANSCRIPTION':
-      const filteredHistory = state.filter(item => item.id !== action.payload);
-      localStorage.setItem('transcriptionHistory', JSON.stringify(filteredHistory));
-      return filteredHistory;
-    
+      newState = state.filter(item => item.id !== action.payload);
+      break;
     default:
       return state;
   }
+  
+  // Update localStorage for all mutations except LOAD_HISTORY
+  if (action.type !== 'LOAD_HISTORY') {
+    try {
+      if (newState.length === 0) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      }
+    } catch (error) {
+      console.warn('Failed to update localStorage:', error);
+    }
+  }
+  
+  return newState;
 };
 
 export const HistoryProvider = ({ children }) => {
   const [history, dispatch] = useReducer(historyReducer, []);
 
   useEffect(() => {
-    const savedHistory = localStorage.getItem('transcriptionHistory');
-    if (savedHistory) {
-      dispatch({ type: 'LOAD_HISTORY', payload: JSON.parse(savedHistory) });
+    try {
+      const savedHistory = localStorage.getItem(STORAGE_KEY);
+      if (savedHistory) {
+        dispatch({ type: 'LOAD_HISTORY', payload: JSON.parse(savedHistory) });
+      }
+    } catch (error) {
+      console.warn('Failed to load history from localStorage:', error);
     }
   }, []);
 

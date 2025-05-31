@@ -1,20 +1,27 @@
 import axios from 'axios';
+import { DEFAULT_API_BASE_URL } from '../utils/constants';
 
-const API_BASE_URL = 'http://localhost:9000/api';
+let currentBaseURL = DEFAULT_API_BASE_URL;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: currentBaseURL,
   headers: {
     'Content-Type': 'multipart/form-data',
   },
 });
+
+// Function to update the base URL dynamically
+export const updateApiBaseURL = (newBaseURL) => {
+  currentBaseURL = `${newBaseURL}/api`;
+  api.defaults.baseURL = currentBaseURL;
+};
 
 export const transcriptionAPI = {
   // Upload file and start transcription
   uploadAndTranscribe: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await api.post('/transcribe', formData);
     return response.data;
   },
@@ -27,6 +34,9 @@ export const transcriptionAPI = {
 
   // Download MIDI file
   downloadMidi: (filename) => {
-    return `${API_BASE_URL}/download_midi/${filename}`;
-  }
+    return `${currentBaseURL}/download_midi/${filename}`;
+  },
+
+  // Get current base URL
+  getCurrentBaseURL: () => currentBaseURL
 };

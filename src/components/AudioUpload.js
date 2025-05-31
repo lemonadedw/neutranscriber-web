@@ -1,38 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { SUPPORTED_AUDIO_TYPES, SUPPORTED_AUDIO_EXTENSIONS, MAX_FILE_SIZE } from '../utils/constants';
 
-const AudioUpload = ({ onFileSelect, disabled }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
+const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFile }) => {
+  const [internalSelectedFile, setInternalSelectedFile] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    processFile(file);
-  };
+  const selectedFile = externalSelectedFile || internalSelectedFile;
 
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
+  // Sync internal state with external selectedFile prop
+  useEffect(() => {
+    setInternalSelectedFile(externalSelectedFile);
+  }, [externalSelectedFile]);
 
-  const handleDragLeave = (event) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
+  // Reset file input when selectedFile becomes null
+  useEffect(() => {
+    if (!externalSelectedFile && fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [externalSelectedFile]);
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragOver(false);
-    const file = event.dataTransfer.files[0];
-    processFile(file);
-  };
+  const validateFile = useCallback((file) => {
+    if (!file) return { isValid: false, error: 'No file selected' };
 
-  const processFile = (file) => {
-    if (file && (file.type === 'audio/mpeg' || file.type === 'audio/mp3' || file.name.toLowerCase().endsWith('.mp3'))) {
-      setSelectedFile(file);
+    if (file.size > MAX_FILE_SIZE) {
+      return { isValid: false, error: `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit` };
+    }
+
+    const isValidType = SUPPORTED_AUDIO_TYPES.includes(file.type) ||
+      SUPPORTED_AUDIO_EXTENSIONS.some(ext => file.name.toLowerCase().endsWith(ext));
+
+    if (!isValidType) {
+      return { isValid: false, error: 'Please select a valid audio file (MP3, WAV, FLAC, OGG, M4A, AIFF, AAC)' };
+    }
+
+    return { isValid: true };
+  }, []);
+
+  const processFile = useCallback((file) => {
+    const { isValid, error } = validateFile(file);
+
+    if (isValid) {
+      setInternalSelectedFile(file);
       onFileSelect(file);
     } else {
-      alert('Please select an MP3 file');
+      alert(error);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
+  }, [validateFile, onFileSelect]);
+
+  const handleFileChange = useCallback((event) => {
+    processFile(event.target.files[0]);
+  }, [processFile]);
+
+  const handleDragOver = useCallback((event) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((event) => {
+    event.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((event) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    processFile(event.dataTransfer.files[0]);
+  }, [processFile]);
+
+  const getUploadZoneClasses = () => {
+    const baseClasses = "relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300";
+
+    if (disabled) return `${baseClasses} opacity-50 cursor-not-allowed`;
+    if (isDragOver) return `${baseClasses} border-emerald-400 bg-emerald-50 scale-105`;
+    if (selectedFile) return `${baseClasses} border-blue-300 bg-blue-50`;
+
+    return `${baseClasses} border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer hover:shadow-lg`;
+  };
+
+  const getIconClasses = () => {
+    const baseClasses = "inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300";
+
+    if (isDragOver) return `${baseClasses} bg-emerald-100 text-emerald-600`;
+    if (selectedFile) return `${baseClasses} bg-blue-100 text-blue-600`;
+
+    return `${baseClasses} bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600`;
   };
 
   return (
@@ -43,43 +98,29 @@ const AudioUpload = ({ onFileSelect, disabled }) => {
           Upload Your Piano Audio
         </h2>
         <p className="text-slate-600 text-lg">
-          Drop your MP3 file here or click to browse
+          Drop your audio file here or click to browse
         </p>
       </div>
 
       {/* Upload Zone */}
       <div
-        className={`relative group transition-all duration-300 ${isDragOver ? 'scale-105' : ''
-          }`}
+        className={`relative group transition-all duration-300 ${isDragOver ? 'scale-105' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <input
+          ref={fileInputRef}
           type="file"
-          accept=".mp3,audio/mpeg,audio/mp3"
+          accept={`${SUPPORTED_AUDIO_EXTENSIONS.join(',')},${SUPPORTED_AUDIO_TYPES.join(',')}`}
           onChange={handleFileChange}
           disabled={disabled}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
 
-        <div className={`
-          relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300
-          ${isDragOver
-            ? 'border-emerald-400 bg-emerald-50 scale-105'
-            : selectedFile
-              ? 'border-blue-300 bg-blue-50'
-              : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50'
-          }
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg'}
-        `}>
+        <div className={getUploadZoneClasses()}>
           {/* Upload Icon */}
-          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300 ${isDragOver
-            ? 'bg-emerald-100 text-emerald-600'
-            : selectedFile
-              ? 'bg-blue-100 text-blue-600'
-              : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600'
-            }`}>
+          <div className={getIconClasses()}>
             {selectedFile ? (
               <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -93,21 +134,11 @@ const AudioUpload = ({ onFileSelect, disabled }) => {
 
           {/* Upload Text */}
           <div className="space-y-2">
-            <h3 className={`text-xl font-bold transition-colors duration-300 ${isDragOver
-              ? 'text-emerald-700'
-              : selectedFile
-                ? 'text-blue-700'
-                : 'text-slate-700'
-              }`}>
+            <h3 className="text-xl font-bold transition-colors duration-300 text-slate-700">
               {selectedFile ? 'File Selected!' : isDragOver ? 'Drop your file here' : 'Choose Audio File'}
             </h3>
-            <p className={`text-sm transition-colors duration-300 ${isDragOver
-              ? 'text-emerald-600'
-              : selectedFile
-                ? 'text-blue-600'
-                : 'text-slate-500'
-              }`}>
-              {selectedFile ? 'Click to change file' : 'Supports MP3 format • Max 50MB'}
+            <p className="text-sm transition-colors duration-300 text-slate-500">
+              {selectedFile ? 'Click to change file' : `Supports ${SUPPORTED_AUDIO_EXTENSIONS.join(', ').toUpperCase()} • Max ${MAX_FILE_SIZE / 1024 / 1024}MB`}
             </p>
           </div>
         </div>
