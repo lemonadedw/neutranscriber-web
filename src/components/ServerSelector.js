@@ -14,7 +14,13 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
             })
         );
         setServers(updatedServers);
-    }, [servers]);
+        
+        // Update the selectedServer if its ID matches one in the updated servers
+        const updatedSelectedServer = updatedServers.find(server => server.id === selectedServer.id);
+        if (updatedSelectedServer && updatedSelectedServer.status !== selectedServer.status) {
+            onServerSelect(updatedSelectedServer);
+        }
+    }, [servers, selectedServer, onServerSelect]);
 
     useEffect(() => {
         updateServerStatus();

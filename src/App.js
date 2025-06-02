@@ -6,7 +6,7 @@ import ThemeToggle from './components/ThemeToggle';
 import { useTranscription } from './hooks/useTranscription';
 import { useHistory } from './contexts/HistoryContext';
 import { transcriptionAPI, updateApiBaseURL } from './services/api';
-import { SERVER_STATUS } from './utils/constants';
+import { DEFAULT_SERVERS, SERVER_STATUS } from './utils/constants';
 
 // UI Components
 const Header = ({ selectedServer }) => (
@@ -195,13 +195,7 @@ const SuccessState = ({ result, onDownload, onStartOver }) => (
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedServer, setSelectedServer] = useState({
-    id: 'localhost',
-    name: 'Local Server',
-    url: 'http://localhost:9000',
-    healthUrl: 'http://localhost:9000/api/health',
-    status: 'checking'
-  });
+  const [selectedServer, setSelectedServer] = useState(DEFAULT_SERVERS[0]); // Default to first server
 
   const { transcribeAudio, resetTranscription, isTranscribing, progress, result, error } = useTranscription();
   const { addTranscription } = useHistory();
