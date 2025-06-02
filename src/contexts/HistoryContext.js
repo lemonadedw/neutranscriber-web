@@ -2,6 +2,31 @@ import React, { createContext, useContext, useReducer, useEffect, useCallback } 
 
 const STORAGE_KEY = 'transcriptionHistory';
 
+// Storage utility functions
+const saveToStorage = (data) => {
+  try {
+    if (data.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    return true;
+  } catch (error) {
+    console.warn('Failed to update localStorage:', error);
+    return false;
+  }
+};
+
+const loadFromStorage = () => {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : [];
+  } catch (error) {
+    console.warn('Failed to load from localStorage:', error);
+    return [];
+  }
+};
+
 const HistoryContext = createContext();
 
 const historyReducer = (state, action) => {
@@ -25,15 +50,7 @@ const historyReducer = (state, action) => {
 
   // Update localStorage for all mutations except LOAD_HISTORY
   if (action.type !== 'LOAD_HISTORY') {
-    try {
-      if (newState.length === 0) {
-        localStorage.removeItem(STORAGE_KEY);
-      } else {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      }
-    } catch (error) {
-      console.warn('Failed to update localStorage:', error);
-    }
+    saveToStorage(newState);
   }
 
   return newState;
@@ -43,14 +60,8 @@ export const HistoryProvider = ({ children }) => {
   const [history, dispatch] = useReducer(historyReducer, []);
 
   useEffect(() => {
-    try {
-      const savedHistory = localStorage.getItem(STORAGE_KEY);
-      if (savedHistory) {
-        dispatch({ type: 'LOAD_HISTORY', payload: JSON.parse(savedHistory) });
-      }
-    } catch (error) {
-      console.warn('Failed to load history from localStorage:', error);
-    }
+    const savedHistory = loadFromStorage();
+    dispatch({ type: 'LOAD_HISTORY', payload: savedHistory });
   }, []);
 
   const addTranscription = useCallback((transcription) => {
@@ -62,7 +73,6 @@ export const HistoryProvider = ({ children }) => {
       processingTime: transcription.transcription_time,
       midiFilename: transcription.midi_filename,
       status: transcription.status,
-      // Add server information
       serverUrl: transcription.serverUrl,
       serverName: transcription.serverName
     };

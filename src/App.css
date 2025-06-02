@@ -4,7 +4,6 @@
 @tailwind utilities;
 
 @layer components {
-
   /* Button Components */
   .btn-base {
     @apply font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 relative overflow-hidden;
@@ -18,13 +17,38 @@
     @apply btn-base bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/25;
   }
 
+  .btn-tertiary {
+    @apply btn-base bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white;
+  }
+
+  .btn-danger {
+    @apply btn-base bg-red-600 hover:bg-red-700 text-white;
+  }
+
   .btn-icon {
     @apply p-2 border-none rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center hover:scale-110;
   }
 
   /* Card Components */
   .card-glass {
-    @apply bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 transition-all duration-300;
+    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 dark:border-slate-700/30 transition-all duration-300;
+  }
+
+  .card-primary {
+    @apply card-glass p-6 sm:p-8 lg:p-12;
+  }
+
+  /* Status Cards */
+  .status-success {
+    @apply bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-2 border-emerald-200 dark:border-emerald-800 rounded-3xl p-8 text-center relative overflow-hidden;
+  }
+
+  .status-error {
+    @apply bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 rounded-2xl p-6 text-center;
+  }
+
+  .status-warning {
+    @apply bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-700 rounded-2xl p-4 text-center;
   }
 
   /* Upload Zone */
@@ -32,22 +56,60 @@
     @apply border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300 cursor-pointer hover:shadow-lg;
   }
 
-  /* Status Components */
-  .status-success {
-    @apply bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-3xl p-8 text-center relative overflow-hidden;
+  .upload-zone-active {
+    @apply upload-zone border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20;
   }
 
-  .status-error {
-    @apply bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center;
+  .upload-zone-dragging {
+    @apply upload-zone border-emerald-400 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20 scale-105;
   }
 
-  /* Utilities */
+  .upload-zone-disabled {
+    @apply upload-zone opacity-50 cursor-not-allowed;
+  }
+
+  /* Animations */
   .animate-slide-up {
     @apply animate-in slide-in-from-bottom-4 duration-500;
   }
 
+  .animate-fade-in {
+    @apply animate-in fade-in duration-300;
+  }
+
+  /* Utils */
   .scrollbar-custom {
-    @apply scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-white/10;
+    @apply scrollbar-thin scrollbar-thumb-indigo-300 dark:scrollbar-thumb-indigo-600 scrollbar-track-white/10 dark:scrollbar-track-slate-800/50;
+  }
+
+  /* Status Indicators */
+  .status-indicator {
+    @apply w-2 h-2 rounded-full shadow-lg;
+  }
+
+  .status-online {
+    @apply status-indicator bg-green-500 shadow-green-500/50;
+  }
+
+  .status-offline {
+    @apply status-indicator bg-red-500 shadow-red-500/50;
+  }
+
+  .status-checking {
+    @apply status-indicator bg-yellow-500 shadow-yellow-500/50 animate-pulse;
+  }
+
+  /* Text Headers */
+  .header-primary {
+    @apply text-slate-800 dark:text-slate-100 font-bold;
+  }
+
+  .text-secondary {
+    @apply text-slate-600 dark:text-slate-300;
+  }
+
+  .text-muted {
+    @apply text-slate-500 dark:text-slate-400;
   }
 }
 

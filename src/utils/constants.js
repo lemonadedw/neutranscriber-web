@@ -1,3 +1,4 @@
+// Server configuration
 export const DEFAULT_SERVERS = [
     {
         id: 'localhost',
@@ -17,6 +18,7 @@ export const DEFAULT_SERVERS = [
 
 export const DEFAULT_API_BASE_URL = 'http://localhost:9000/api';
 
+// Application status messages
 export const STATUS_MESSAGES = {
     SUCCESS: 'Transcription completed successfully.',
     FAILURE: 'Transcription failed. Please try again.',
@@ -26,6 +28,22 @@ export const STATUS_MESSAGES = {
     COMPLETE: 'Transcription complete!'
 };
 
+// Server status mapping
+export const SERVER_STATUS = {
+    ONLINE: 'online',
+    OFFLINE: 'offline',
+    ERROR: 'error',
+    CHECKING: 'checking'
+};
+
+export const SERVER_STATUS_DISPLAY = {
+    [SERVER_STATUS.ONLINE]: 'Online',
+    [SERVER_STATUS.OFFLINE]: 'Offline',
+    [SERVER_STATUS.ERROR]: 'Error',
+    [SERVER_STATUS.CHECKING]: 'Checking...'
+};
+
+// File upload configurations
 export const SUPPORTED_AUDIO_TYPES = [
     'audio/mpeg', 'audio/mp3',
     'audio/wav', 'audio/wave', 'audio/x-wav',
@@ -40,4 +58,6 @@ export const SUPPORTED_AUDIO_EXTENSIONS = ['.mp3', '.wav', '.flac', '.ogg', '.m4
 
 export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
+// App configurations
 export const POLL_INTERVAL = 2000; // 2 seconds
+export const SERVER_HEALTH_CHECK_INTERVAL = 30000; // 30 seconds

@@ -2,6 +2,24 @@ import { useState, useCallback } from 'react';
 import { transcriptionAPI } from '../services/api';
 import { STATUS_MESSAGES, POLL_INTERVAL } from '../utils/constants';
 
+const STATUS_HANDLERS = {
+  PENDING: (setProgress) => {
+    setProgress(STATUS_MESSAGES.PROCESSING);
+    return true; // Continue polling
+  },
+  SUCCESS: (setProgress, setResult, setIsTranscribing, status) => {
+    setResult(status.result);
+    setProgress(STATUS_MESSAGES.COMPLETE);
+    setIsTranscribing(false);
+    return false; // Stop polling
+  },
+  FAILURE: (setError, setIsTranscribing, status) => {
+    setError(status.status || STATUS_MESSAGES.FAILURE);
+    setIsTranscribing(false);
+    return false; // Stop polling
+  }
+};
+
 export const useTranscription = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [progress, setProgress] = useState('');
@@ -11,24 +29,23 @@ export const useTranscription = () => {
   const pollStatus = useCallback(async (taskId) => {
     try {
       const status = await transcriptionAPI.getTranscriptionStatus(taskId);
-
-      switch (status.state) {
-        case 'PENDING':
-          setProgress(STATUS_MESSAGES.PROCESSING);
-          setTimeout(() => pollStatus(taskId), POLL_INTERVAL);
-          break;
-        case 'SUCCESS':
-          setResult(status.result);
-          setProgress(STATUS_MESSAGES.COMPLETE);
-          setIsTranscribing(false);
-          break;
-        case 'FAILURE':
-          setError(status.status || STATUS_MESSAGES.FAILURE);
-          setIsTranscribing(false);
-          break;
-        default:
+      const handler = STATUS_HANDLERS[status.state] || 
+        ((setError, setIsTranscribing) => {
           setError('Unknown transcription status');
           setIsTranscribing(false);
+          return false;
+        });
+
+      const shouldContinuePolling = handler(
+        setProgress, 
+        setResult, 
+        setIsTranscribing, 
+        status, 
+        setError
+      );
+      
+      if (shouldContinuePolling) {
+        setTimeout(() => pollStatus(taskId), POLL_INTERVAL);
       }
     } catch (err) {
       setError('Failed to check transcription status');

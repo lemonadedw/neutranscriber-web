@@ -72,32 +72,30 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFil
   }, [processFile]);
 
   const getUploadZoneClasses = () => {
-    const baseClasses = "relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300";
-
-    if (disabled) return `${baseClasses} opacity-50 cursor-not-allowed`;
-    if (isDragOver) return `${baseClasses} border-emerald-400 bg-emerald-50 scale-105`;
-    if (selectedFile) return `${baseClasses} border-blue-300 bg-blue-50`;
-
-    return `${baseClasses} border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer hover:shadow-lg`;
+    if (disabled) return 'upload-zone-disabled';
+    if (isDragOver) return 'upload-zone-dragging';
+    if (selectedFile) return 'upload-zone-active';
+    
+    return 'upload-zone border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 dark:hover:bg-blue-900/20 cursor-pointer hover:shadow-lg dark:hover:shadow-slate-900/20';
   };
 
   const getIconClasses = () => {
     const baseClasses = "inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300";
 
-    if (isDragOver) return `${baseClasses} bg-emerald-100 text-emerald-600`;
-    if (selectedFile) return `${baseClasses} bg-blue-100 text-blue-600`;
+    if (isDragOver) return `${baseClasses} bg-emerald-100 text-emerald-600 dark:bg-emerald-800/30 dark:text-emerald-400`;
+    if (selectedFile) return `${baseClasses} bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400`;
 
-    return `${baseClasses} bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600`;
+    return `${baseClasses} bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-800/30 dark:group-hover:text-blue-400`;
   };
 
   return (
     <div className="space-y-6">
       {/* Upload Section Header */}
       <div className="text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">
+        <h2 className="text-2xl sm:text-3xl header-primary mb-3">
           Upload Your Piano Audio
         </h2>
-        <p className="text-slate-600 text-lg">
+        <p className="text-secondary text-lg">
           Drop your audio file here or click to browse
         </p>
       </div>
@@ -134,10 +132,10 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFil
 
           {/* Upload Text */}
           <div className="space-y-2">
-            <h3 className="text-xl font-bold transition-colors duration-300 text-slate-700">
+            <h3 className="text-xl font-bold transition-colors duration-300 text-slate-700 dark:text-slate-200">
               {selectedFile ? 'File Selected!' : isDragOver ? 'Drop your file here' : 'Choose Audio File'}
             </h3>
-            <p className="text-sm transition-colors duration-300 text-slate-500">
+            <p className="text-sm transition-colors duration-300 text-slate-500 dark:text-slate-400">
               {selectedFile ? 'Click to change file' : `Supports ${SUPPORTED_AUDIO_EXTENSIONS.join(', ').toUpperCase()} • Max ${MAX_FILE_SIZE / 1024 / 1024}MB`}
             </p>
           </div>
@@ -146,30 +144,30 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFil
 
       {/* File Details */}
       {selectedFile && (
-        <div className="animate-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
+        <div className="animate-slide-up">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
 
               <div className="flex-grow min-w-0">
-                <h4 className="text-lg font-semibold text-slate-800 mb-1 truncate" title={selectedFile.name}>
+                <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1 truncate" title={selectedFile.name}>
                   {selectedFile.name}
                 </h4>
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
                   Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                 </p>
 
                 {/* Audio Preview */}
-                <div className="bg-white rounded-xl p-4 border border-blue-100">
-                  <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-blue-100 dark:border-slate-700">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Preview:</p>
                   <audio
                     controls
                     src={URL.createObjectURL(selectedFile)}
-                    className="w-full h-10 rounded-lg"
+                    className="w-full h-10 rounded-lg dark:invert"
                     preload="metadata"
                   />
                 </div>
