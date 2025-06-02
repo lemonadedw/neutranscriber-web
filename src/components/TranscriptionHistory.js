@@ -20,9 +20,10 @@ const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleDownload = useCallback((midiFilename, fileName) => {
-    if (midiFilename) {
-      const downloadUrl = transcriptionAPI.downloadMidi(midiFilename);
+  const handleDownload = useCallback((midiFilename, fileName, serverUrl) => {
+    if (midiFilename && serverUrl) {
+      // Use the original server URL, not the current one
+      const downloadUrl = `${serverUrl}/api/download_midi/${midiFilename}`;
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `${fileName.replace(/\.[^/.]+$/, '')}.mid`;
@@ -148,12 +149,19 @@ const TranscriptionHistory = () => {
                                 </svg>
                                 {item.processingTime}s
                               </span>
+                              {/* Add server information */}
+                              <span className="flex items-center gap-1 sm:gap-1.5 text-xs text-gray-600">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="opacity-60 sm:w-3 sm:h-3">
+                                  <path d="M4,1H20A1,1 0 0,1 21,2V6A1,1 0 0,1 20,7H4A1,1 0 0,1 3,6V2A1,1 0 0,1 4,1M4,9H20A1,1 0 0,1 21,10V14A1,1 0 0,1 20,15H4A1,1 0 0,1 3,14V10A1,1 0 0,1 4,9M4,17H20A1,1 0 0,1 21,18V22A1,1 0 0,1 20,23H4A1,1 0 0,1 3,22V18A1,1 0 0,1 4,17Z" />
+                                </svg>
+                                {item.serverName || 'Unknown Server'}
+                              </span>
                             </div>
                           </div>
                         </div>
                         <div className="flex gap-1.5 sm:gap-2 justify-end">
                           <button
-                            onClick={() => handleDownload(item.midiFilename, item.fileName)}
+                            onClick={() => handleDownload(item.midiFilename, item.fileName, item.serverUrl)}
                             className="p-1.5 sm:p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/40"
                             title="Download MIDI file"
                           >

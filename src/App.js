@@ -64,10 +64,14 @@ function App() {
       addTranscription({
         ...result,
         fileName: selectedFile.name,
-        fileSize: selectedFile.size
+        fileSize: selectedFile.size,
+        // Include server information
+        serverUrl: selectedServer.url,
+        serverName: selectedServer.name
       });
     }
-  }, [result, selectedFile, addTranscription]);
+  }, [result, selectedFile, selectedServer, addTranscription]);
+
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">

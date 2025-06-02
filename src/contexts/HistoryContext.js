@@ -6,7 +6,7 @@ const HistoryContext = createContext();
 
 const historyReducer = (state, action) => {
   let newState;
-  
+
   switch (action.type) {
     case 'ADD_TRANSCRIPTION':
       newState = [action.payload, ...state];
@@ -22,7 +22,7 @@ const historyReducer = (state, action) => {
     default:
       return state;
   }
-  
+
   // Update localStorage for all mutations except LOAD_HISTORY
   if (action.type !== 'LOAD_HISTORY') {
     try {
@@ -35,7 +35,7 @@ const historyReducer = (state, action) => {
       console.warn('Failed to update localStorage:', error);
     }
   }
-  
+
   return newState;
 };
 
@@ -61,7 +61,10 @@ export const HistoryProvider = ({ children }) => {
       fileSize: transcription.fileSize,
       processingTime: transcription.transcription_time,
       midiFilename: transcription.midi_filename,
-      status: transcription.status
+      status: transcription.status,
+      // Add server information
+      serverUrl: transcription.serverUrl,
+      serverName: transcription.serverName
     };
     dispatch({ type: 'ADD_TRANSCRIPTION', payload: historyItem });
   }, []);
