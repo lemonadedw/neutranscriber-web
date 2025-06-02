@@ -91,7 +91,6 @@ const TranscribeButton = ({ onClick }) => (
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
         </svg>
         <span>Start Transcription</span>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
       </div>
     </button>
   </div>
@@ -214,7 +213,6 @@ function App() {
 
   const handleServerSelect = (server) => {
     setSelectedServer(server);
-    updateApiBaseURL(server.url);
     resetTranscription();
   };
 
@@ -239,7 +237,7 @@ function App() {
   // Initialize API base URL on component mount
   useEffect(() => {
     updateApiBaseURL(selectedServer.url);
-  }, []);
+  }, [selectedServer.url]);
 
   // Add successful transcription to history
   useEffect(() => {
@@ -259,27 +257,27 @@ function App() {
     if (isTranscribing) {
       return <LoadingState progress={progress} />;
     }
-    
+
     if (error) {
       return <ErrorState error={error} onReset={resetTranscription} />;
     }
-    
+
     if (result && result.status === 'SUCCESS') {
-      return <SuccessState 
-        result={result} 
-        onDownload={handleDownload} 
-        onStartOver={handleStartOver} 
+      return <SuccessState
+        result={result}
+        onDownload={handleDownload}
+        onStartOver={handleStartOver}
       />;
     }
-    
+
     if (selectedFile && selectedServer.status !== SERVER_STATUS.ONLINE) {
       return <ServerWarning />;
     }
-    
+
     if (selectedFile && !isTranscribing && !error && !result && selectedServer.status === SERVER_STATUS.ONLINE) {
       return <TranscribeButton onClick={handleStartTranscription} />;
     }
-    
+
     return null;
   };
 
@@ -305,7 +303,7 @@ function App() {
               disabled={isTranscribing}
               selectedFile={selectedFile}
             />
-            
+
             {renderTranscriptionState()}
           </div>
 
