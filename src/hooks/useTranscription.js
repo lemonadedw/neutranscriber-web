@@ -29,7 +29,7 @@ export const useTranscription = () => {
   const pollStatus = useCallback(async (taskId) => {
     try {
       const status = await transcriptionAPI.getTranscriptionStatus(taskId);
-      const handler = STATUS_HANDLERS[status.state] || 
+      const handler = STATUS_HANDLERS[status.state] ||
         ((setError, setIsTranscribing) => {
           setError('Unknown transcription status');
           setIsTranscribing(false);
@@ -37,13 +37,13 @@ export const useTranscription = () => {
         });
 
       const shouldContinuePolling = handler(
-        setProgress, 
-        setResult, 
-        setIsTranscribing, 
-        status, 
+        setProgress,
+        setResult,
+        setIsTranscribing,
+        status,
         setError
       );
-      
+
       if (shouldContinuePolling) {
         setTimeout(() => pollStatus(taskId), POLL_INTERVAL);
       }
