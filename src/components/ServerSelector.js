@@ -9,7 +9,7 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
     const updateServerStatus = useCallback(async () => {
         const updatedServers = await Promise.all(
             servers.map(async (server) => {
-                const status = await transcriptionAPI.checkServerHealth(server.healthUrl);
+                const status = await transcriptionAPI.checkServerHealth(server.url+'/api/health');
                 return { ...server, status };
             })
         );

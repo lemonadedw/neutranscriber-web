@@ -56,7 +56,7 @@ export const transcriptionAPI = {
   downloadMidi: (filename) => {
     return `${currentBaseURL}/download_midi/${filename}`;
   },
-
+  
   // Health check for a server
   checkServerHealth: async (healthUrl) => {
     try {

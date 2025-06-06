@@ -1,22 +1,26 @@
 // Server configuration
 export const DEFAULT_SERVERS = [
     {
-        id: 'localhost',
-        name: 'Local Server',
+        id: '0',
+        name: 'Localhost',
         url: 'http://localhost:9000',
-        healthUrl: 'http://localhost:9000/api/health',
-        status: 'checking'
     },
     {
-        id: 'remote',
-        name: 'Remote Server',
+        id: '1',
+        name: '40.73.3.5',
         url: 'http://40.73.3.5:9000',
-        healthUrl: 'http://40.73.3.5:9000/api/health',
-        status: 'checking'
     }
 ];
 
-export const DEFAULT_API_BASE_URL = 'http://localhost:9000/api';
+export const DEFAULT_API_BASE_URL = `${DEFAULT_SERVERS[0].url}/api`;
+
+// Server status mapping
+export const SERVER_STATUS = {
+    ONLINE: 'online',
+    OFFLINE: 'offline',
+    ERROR: 'error',
+    CHECKING: 'checking'
+};
 
 // Application status messages
 export const STATUS_MESSAGES = {
@@ -26,14 +30,6 @@ export const STATUS_MESSAGES = {
     TRANSCRIBING: 'Transcribing audio...',
     PROCESSING: 'Processing...',
     COMPLETE: 'Transcription complete!'
-};
-
-// Server status mapping
-export const SERVER_STATUS = {
-    ONLINE: 'online',
-    OFFLINE: 'offline',
-    ERROR: 'error',
-    CHECKING: 'checking'
 };
 
 export const SERVER_STATUS_DISPLAY = {
