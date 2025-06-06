@@ -5,16 +5,16 @@ import { transcriptionAPI } from '../services/api';
 const ServerSelector = ({ onServerSelect, selectedServer }) => {
     const [servers, setServers] = useState(DEFAULT_SERVERS);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    
+
     const updateServerStatus = useCallback(async () => {
         const updatedServers = await Promise.all(
             servers.map(async (server) => {
-                const status = await transcriptionAPI.checkServerHealth(server.url+'/api/health');
+                const status = await transcriptionAPI.checkServerHealth(server.url + '/api/health');
                 return { ...server, status };
             })
         );
         setServers(updatedServers);
-        
+
         // Update the selectedServer if its ID matches one in the updated servers
         const updatedSelectedServer = updatedServers.find(server => server.id === selectedServer.id);
         if (updatedSelectedServer && updatedSelectedServer.status !== selectedServer.status) {
@@ -87,8 +87,8 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
                                         key={server.id}
                                         onClick={() => handleServerSelect(server)}
                                         className={`w-full p-3 rounded-lg text-left transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-700 border ${selectedServer?.id === server.id
-                                                ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30'
-                                                : 'border-transparent'
+                                            ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30'
+                                            : 'border-transparent'
                                             } transition-colors duration-300`}
                                     >
                                         <div className="flex items-center gap-3">

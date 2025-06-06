@@ -56,21 +56,21 @@ export const transcriptionAPI = {
   downloadMidi: (filename) => {
     return `${currentBaseURL}/download_midi/${filename}`;
   },
-  
+
   // Health check for a server
   checkServerHealth: async (healthUrl) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch(healthUrl, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
         return data.status === 'ok' ? 'online' : 'error';
