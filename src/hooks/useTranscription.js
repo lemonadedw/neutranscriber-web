@@ -1,56 +1,66 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { transcriptionAPI } from '../services/api';
-import { STATUS_MESSAGES, POLL_INTERVAL } from '../utils/constants';
-
-const STATUS_HANDLERS = {
-  PENDING: (setProgress) => {
-    setProgress(STATUS_MESSAGES.PROCESSING);
-    return true; // Continue polling
-  },
-  SUCCESS: (setProgress, setResult, setIsTranscribing, status) => {
-    setResult(status.result);
-    setProgress(STATUS_MESSAGES.COMPLETE);
-    setIsTranscribing(false);
-    return false; // Stop polling
-  },
-  FAILURE: (setError, setIsTranscribing, status) => {
-    setError(status.status || STATUS_MESSAGES.FAILURE);
-    setIsTranscribing(false);
-    return false; // Stop polling
-  }
-};
+import { websocketService } from '../services/websocket';
+import { STATUS_MESSAGES } from '../utils/constants';
 
 export const useTranscription = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [progress, setProgress] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const currentTaskIdRef = useRef(null);
+  const processedEventsRef = useRef(new Set()); // De-duplicate events from multiple workers
 
-  const pollStatus = useCallback(async (taskId) => {
-    try {
-      const status = await transcriptionAPI.getTranscriptionStatus(taskId);
-      const handler = STATUS_HANDLERS[status.state] ||
-        ((setError, setIsTranscribing) => {
-          setError('Unknown transcription status');
-          setIsTranscribing(false);
-          return false;
-        });
+  useEffect(() => {
+    // Connect to WebSocket on mount
+    websocketService.connect();
 
-      const shouldContinuePolling = handler(
-        setProgress,
-        setResult,
-        setIsTranscribing,
-        status,
-        setError
-      );
+    // Set up listener for transcription updates
+    const cleanup = websocketService.onTranscriptionUpdate((data) => {
+      const { task_id, state, data: payload } = data;
 
-      if (shouldContinuePolling) {
-        setTimeout(() => pollStatus(taskId), POLL_INTERVAL);
+      // Only process updates for the current task
+      if (task_id !== currentTaskIdRef.current) {
+        return;
       }
-    } catch (err) {
-      setError('Failed to check transcription status');
-      setIsTranscribing(false);
-    }
+
+      // De-duplicate: Create unique event ID and check if already processed
+      // This prevents duplicate processing when multiple Gunicorn workers emit the same event
+      const payloadKey = payload.status || payload.midi_filename || payload.error || '';
+      const eventId = `${task_id}-${state}-${payloadKey}`;
+      
+      if (processedEventsRef.current.has(eventId)) {
+        return;
+      }
+      processedEventsRef.current.add(eventId);
+
+      switch (state) {
+        case 'PROCESSING':
+          setProgress(payload.status || STATUS_MESSAGES.PROCESSING);
+          break;
+
+        case 'SUCCESS':
+          setResult(payload);
+          setProgress(STATUS_MESSAGES.COMPLETE);
+          setIsTranscribing(false);
+          currentTaskIdRef.current = null;
+          break;
+
+        case 'FAILURE':
+          setError(payload.error || STATUS_MESSAGES.FAILURE);
+          setIsTranscribing(false);
+          currentTaskIdRef.current = null;
+          break;
+
+        default:
+          console.warn('Unknown transcription state:', state);
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      cleanup();
+    };
   }, []);
 
   const transcribeAudio = useCallback(async (file) => {
@@ -58,22 +68,27 @@ export const useTranscription = () => {
     setError(null);
     setResult(null);
     setProgress(STATUS_MESSAGES.UPLOADING);
+    processedEventsRef.current.clear(); // Clear processed events for new task
 
     try {
       const { task_id } = await transcriptionAPI.uploadAndTranscribe(file);
+      currentTaskIdRef.current = task_id;
       setProgress(STATUS_MESSAGES.TRANSCRIBING);
-      pollStatus(task_id);
     } catch (err) {
+      console.error('Upload failed:', err);
       setError(err.response?.data?.error || 'Failed to upload file');
       setIsTranscribing(false);
+      currentTaskIdRef.current = null;
     }
-  }, [pollStatus]);
+  }, []);
 
   const resetTranscription = useCallback(() => {
     setIsTranscribing(false);
     setProgress('');
     setResult(null);
     setError(null);
+    currentTaskIdRef.current = null;
+    processedEventsRef.current.clear(); // Clear processed events on reset
   }, []);
 
   return {

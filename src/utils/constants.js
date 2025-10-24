@@ -5,11 +5,11 @@ export const DEFAULT_SERVERS = [
         name: 'Localhost',
         url: 'http://localhost:9000',
     },
-    {
-        id: '1',
-        name: '40.73.3.5',
-        url: 'http://40.73.3.5:9000',
-    }
+    // {
+    //     id: '1',
+    //     name: '40.73.3.5',
+    //     url: 'http://40.73.3.5:9000',
+    // }
 ];
 
 export const DEFAULT_API_BASE_URL = `${DEFAULT_SERVERS[0].url}/api`;

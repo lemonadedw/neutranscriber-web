@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DEFAULT_API_BASE_URL } from '../utils/constants';
+import { websocketService } from './websocket';
 
 let currentBaseURL = DEFAULT_API_BASE_URL;
 
@@ -26,6 +27,9 @@ api.interceptors.response.use(
 export const updateApiBaseURL = (newBaseURL) => {
   currentBaseURL = `${newBaseURL}/api`;
   api.defaults.baseURL = currentBaseURL;
+  
+  // Also update WebSocket connection
+  websocketService.updateBaseURL(newBaseURL);
 };
 
 export const transcriptionAPI = {
