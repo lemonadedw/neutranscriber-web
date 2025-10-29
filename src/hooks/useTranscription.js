@@ -73,6 +73,11 @@ export const useTranscription = () => {
     try {
       const { task_id } = await transcriptionAPI.uploadAndTranscribe(file);
       currentTaskIdRef.current = task_id;
+      
+      // Join the task-specific room to ensure this client only receives updates for this task
+      // This prevents information leakage from other users' transcription tasks
+      websocketService.joinTask(task_id);
+      
       setProgress(STATUS_MESSAGES.TRANSCRIBING);
     } catch (err) {
       console.error('Upload failed:', err);
@@ -83,6 +88,11 @@ export const useTranscription = () => {
   }, []);
 
   const resetTranscription = useCallback(() => {
+    // Leave the task room to clean up
+    if (currentTaskIdRef.current) {
+      websocketService.leaveTask(currentTaskIdRef.current);
+    }
+    
     setIsTranscribing(false);
     setProgress('');
     setResult(null);

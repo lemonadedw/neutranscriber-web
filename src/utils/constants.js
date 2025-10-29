@@ -39,6 +39,24 @@ export const SERVER_STATUS_DISPLAY = {
     [SERVER_STATUS.CHECKING]: 'Checking...'
 };
 
+// Unified status color and badge styling
+export const STATUS_STYLES = {
+    // Status indicator dot classes (small circle)
+    indicator: {
+        [SERVER_STATUS.ONLINE]: 'bg-green-500 shadow-green-500/50',
+        [SERVER_STATUS.OFFLINE]: 'bg-red-500 shadow-red-500/50',
+        [SERVER_STATUS.ERROR]: 'bg-red-500 shadow-red-500/50',
+        [SERVER_STATUS.CHECKING]: 'bg-yellow-500 shadow-yellow-500/50 animate-pulse'
+    },
+    // Status badge classes (text + background)
+    badge: {
+        [SERVER_STATUS.ONLINE]: 'bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300',
+        [SERVER_STATUS.OFFLINE]: 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300',
+        [SERVER_STATUS.ERROR]: 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300',
+        [SERVER_STATUS.CHECKING]: 'bg-yellow-100 dark:bg-yellow-900/60 text-yellow-700 dark:text-yellow-300'
+    }
+};
+
 // File upload configurations
 export const SUPPORTED_AUDIO_TYPES = [
     'audio/mpeg', 'audio/mp3',
@@ -55,5 +73,4 @@ export const SUPPORTED_AUDIO_EXTENSIONS = ['.mp3', '.wav', '.flac', '.ogg', '.m4
 export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // App configurations
-export const POLL_INTERVAL = 2000; // 2 seconds
 export const SERVER_HEALTH_CHECK_INTERVAL = 30000; // 30 seconds

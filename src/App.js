@@ -6,7 +6,7 @@ import ThemeToggle from './components/ThemeToggle';
 import { useTranscription } from './hooks/useTranscription';
 import { useHistory } from './contexts/HistoryContext';
 import { transcriptionAPI, updateApiBaseURL } from './services/api';
-import { DEFAULT_SERVERS, SERVER_STATUS } from './utils/constants';
+import { DEFAULT_SERVERS, SERVER_STATUS, STATUS_STYLES } from './utils/constants';
 
 // UI Components
 const Header = ({ selectedServer }) => (
@@ -30,12 +30,7 @@ const Header = ({ selectedServer }) => (
     <div className="mt-6 flex items-center justify-center gap-2 text-sm">
       <span className="text-slate-600 dark:text-slate-400 transition-colors duration-300">Connected to:</span>
       <div className="flex items-center gap-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30 dark:border-slate-700/30 transition-colors duration-300">
-        <div className={`w-2 h-2 rounded-full ${selectedServer.status === SERVER_STATUS.ONLINE
-          ? 'bg-green-500 shadow-green-500/50'
-          : selectedServer.status === SERVER_STATUS.CHECKING
-            ? 'bg-yellow-500 shadow-yellow-500/50 animate-pulse'
-            : 'bg-red-500 shadow-red-500/50'
-          } shadow-lg`}></div>
+        <div className={`w-2 h-2 rounded-full ${STATUS_STYLES.indicator[selectedServer.status]} shadow-lg`}></div>
         <span className="font-medium text-slate-700 dark:text-slate-200 transition-colors duration-300">{selectedServer.name}</span>
       </div>
     </div>
@@ -60,7 +55,7 @@ const BackgroundPattern = () => (
 
 const Footer = () => (
   <div className="text-center mt-8 text-slate-500 dark:text-slate-400 transition-colors duration-300">
-    <p className="text-sm">Created by Henry B. W.</p>
+    <p className="text-sm">created by remonedo</p>
   </div>
 );
 

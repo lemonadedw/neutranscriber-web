@@ -1,24 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { SUPPORTED_AUDIO_TYPES, SUPPORTED_AUDIO_EXTENSIONS, MAX_FILE_SIZE } from '../utils/constants';
 
-const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFile }) => {
-  const [internalSelectedFile, setInternalSelectedFile] = useState(null);
+const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  const selectedFile = externalSelectedFile || internalSelectedFile;
-
-  // Sync internal state with external selectedFile prop
-  useEffect(() => {
-    setInternalSelectedFile(externalSelectedFile);
-  }, [externalSelectedFile]);
-
   // Reset file input when selectedFile becomes null
   useEffect(() => {
-    if (!externalSelectedFile && fileInputRef.current) {
+    if (!selectedFile && fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [externalSelectedFile]);
+  }, [selectedFile]);
 
   const validateFile = useCallback((file) => {
     if (!file) return { isValid: false, error: 'No file selected' };
@@ -41,7 +33,6 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile: externalSelectedFil
     const { isValid, error } = validateFile(file);
 
     if (isValid) {
-      setInternalSelectedFile(file);
       onFileSelect(file);
     } else {
       alert(error);

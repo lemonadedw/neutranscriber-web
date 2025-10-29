@@ -1,19 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useHistory } from '../contexts/HistoryContext';
-
-// Utility functions
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-const formatFileSize = (bytes) => {
-  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
-};
+import { formatDate, formatFileSize, removeFileExtension } from '../utils/helpers';
 
 const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();
@@ -25,7 +12,7 @@ const TranscriptionHistory = () => {
       const downloadUrl = `${serverUrl}/api/download_midi/${midiFilename}`;
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${fileName.replace(/\.[^/.]+$/, '')}.mid`;
+      link.download = `${removeFileExtension(fileName)}.mid`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

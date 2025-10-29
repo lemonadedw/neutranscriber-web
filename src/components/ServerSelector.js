@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DEFAULT_SERVERS, SERVER_STATUS, SERVER_STATUS_DISPLAY, SERVER_HEALTH_CHECK_INTERVAL } from '../utils/constants';
+import { DEFAULT_SERVERS, SERVER_STATUS, SERVER_STATUS_DISPLAY, STATUS_STYLES, SERVER_HEALTH_CHECK_INTERVAL } from '../utils/constants';
 import { transcriptionAPI } from '../services/api';
 
 const ServerSelector = ({ onServerSelect, selectedServer }) => {
@@ -27,31 +27,11 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
         const interval = setInterval(updateServerStatus, SERVER_HEALTH_CHECK_INTERVAL);
         return () => clearInterval(interval);
     }, [updateServerStatus]);
-
+ 
     const handleServerSelect = useCallback((server) => {
         onServerSelect(server);
         setIsDropdownOpen(false);
     }, [onServerSelect]);
-
-    const getStatusColor = (status) => {
-        const colors = {
-            [SERVER_STATUS.ONLINE]: 'status-online',
-            [SERVER_STATUS.OFFLINE]: 'status-offline',
-            [SERVER_STATUS.ERROR]: 'status-offline',
-            [SERVER_STATUS.CHECKING]: 'status-checking'
-        };
-        return colors[status] || '';
-    };
-
-    const getStatusBadgeColor = (status) => {
-        const colors = {
-            [SERVER_STATUS.ONLINE]: 'bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300',
-            [SERVER_STATUS.CHECKING]: 'bg-yellow-100 dark:bg-yellow-900/60 text-yellow-700 dark:text-yellow-300',
-            [SERVER_STATUS.OFFLINE]: 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300',
-            [SERVER_STATUS.ERROR]: 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300'
-        };
-        return colors[status] || 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
-    };
 
     return (
         <div className="fixed top-3 left-3 lg:top-5 lg:left-5 z-50">
@@ -61,7 +41,7 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
                     className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm text-slate-700 dark:text-slate-200 border border-white/30 dark:border-slate-700/30 py-2 px-3 lg:py-3 lg:px-4 rounded-xl text-xs lg:text-sm font-semibold cursor-pointer transition-all duration-300 flex items-center gap-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 hover:shadow-xl"
                     title="Select server"
                 >
-                    <div className={getStatusColor(selectedServer?.status || SERVER_STATUS.CHECKING)}></div>
+                    <div className={`w-2 h-2 rounded-full ${STATUS_STYLES.indicator[selectedServer?.status || SERVER_STATUS.CHECKING]} shadow-lg`}></div>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="lg:w-5 lg:h-5">
                         <path d="M4,1H20A1,1 0 0,1 21,2V6A1,1 0 0,1 20,7H4A1,1 0 0,1 3,6V2A1,1 0 0,1 4,1M4,9H20A1,1 0 0,1 21,10V14A1,1 0 0,1 20,15H4A1,1 0 0,1 3,14V10A1,1 0 0,1 4,9M4,17H20A1,1 0 0,1 21,18V22A1,1 0 0,1 20,23H4A1,1 0 0,1 3,22V18A1,1 0 0,1 4,17Z" />
                     </svg>
@@ -92,13 +72,13 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
                                             } transition-colors duration-300`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={getStatusColor(server.status)}></div>
+                                            <div className={`w-2 h-2 rounded-full ${STATUS_STYLES.indicator[server.status]} shadow-lg`}></div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between">
                                                     <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate transition-colors duration-300">
                                                         {server.name}
                                                     </h4>
-                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadgeColor(server.status)} transition-colors duration-300`}>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLES.badge[server.status]} transition-colors duration-300`}>
                                                         {SERVER_STATUS_DISPLAY[server.status]}
                                                     </span>
                                                 </div>
