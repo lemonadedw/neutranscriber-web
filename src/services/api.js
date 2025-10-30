@@ -7,9 +7,6 @@ let currentBaseURL = DEFAULT_API_BASE_URL;
 // Create axios instance with custom config
 const api = axios.create({
   baseURL: currentBaseURL,
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
   timeout: 30000, // 30 second timeout
 });
 
@@ -25,7 +22,14 @@ api.interceptors.response.use(
 
 // Update base URL dynamically
 export const updateApiBaseURL = (newBaseURL) => {
-  currentBaseURL = `${newBaseURL}/api`;
+  const newApiURL = `${newBaseURL}/api`;
+  
+  // Only update if URL actually changed
+  if (currentBaseURL === newApiURL) {
+    return;
+  }
+  
+  currentBaseURL = newApiURL;
   api.defaults.baseURL = currentBaseURL;
   
   // Also update WebSocket connection
@@ -39,7 +43,24 @@ export const transcriptionAPI = {
     formData.append('file', file);
 
     try {
-      const response = await api.post('/transcribe', formData);
+      // Get JWT token from localStorage (stored as 'access_token' by AuthContext)
+      const accessToken = localStorage.getItem('access_token');
+      
+      // Create config with authorization header
+      // IMPORTANT: Do NOT set Content-Type header for FormData
+      // Axios will automatically set it with the correct boundary
+      const config = {
+        headers: {
+          // Remove Content-Type - let axios set it automatically with boundary
+        }
+      };
+      
+      // Add authorization header if token exists
+      if (accessToken) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+      
+      const response = await api.post('/transcribe', formData, config);
       return response.data;
     } catch (error) {
       throw error;
@@ -56,9 +77,26 @@ export const transcriptionAPI = {
     }
   },
 
-  // Download MIDI file
-  downloadMidi: (filename) => {
-    return `${currentBaseURL}/download_midi/${filename}`;
+  // Download MIDI file with authentication
+  downloadMidi: async (filename, token) => {
+    try {
+      const response = await fetch(`${currentBaseURL}/download_midi/${filename}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Download failed: ${response.statusText}`);
+      }
+
+      return response.blob();
+    } catch (error) {
+      console.error('Download error:', error);
+      throw error;
+    }
   },
 
   // Health check for a server

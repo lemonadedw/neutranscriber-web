@@ -6,27 +6,41 @@ const ServerSelector = ({ onServerSelect, selectedServer }) => {
     const [servers, setServers] = useState(DEFAULT_SERVERS);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    // Health check function that can be called manually or by interval
     const updateServerStatus = useCallback(async () => {
-        const updatedServers = await Promise.all(
-            servers.map(async (server) => {
-                const status = await transcriptionAPI.checkServerHealth(server.url + '/api/health');
-                return { ...server, status };
-            })
-        );
-        setServers(updatedServers);
+        setServers(currentServers => {
+            // Check all servers health asynchronously
+            Promise.all(
+                currentServers.map(async (server) => {
+                    const status = await transcriptionAPI.checkServerHealth(server.url + '/api/health');
+                    return { ...server, status };
+                })
+            ).then(updatedServers => {
+                setServers(updatedServers);
 
-        // Update the selectedServer if its ID matches one in the updated servers
-        const updatedSelectedServer = updatedServers.find(server => server.id === selectedServer.id);
-        if (updatedSelectedServer && updatedSelectedServer.status !== selectedServer.status) {
-            onServerSelect(updatedSelectedServer);
-        }
-    }, [servers, selectedServer, onServerSelect]);
+                // Update the selectedServer if its status changed
+                const updatedSelectedServer = updatedServers.find(server => server.id === selectedServer?.id);
+                if (updatedSelectedServer && updatedSelectedServer.status !== selectedServer?.status) {
+                    onServerSelect(updatedSelectedServer);
+                }
+            });
 
+            // Return current state immediately (will be updated by the promise)
+            return currentServers;
+        });
+    }, [selectedServer, onServerSelect]); // Only depends on selectedServer and callback, NOT on servers state
+
+    // Health check runs on mount and every 30 seconds
     useEffect(() => {
+        // Run immediately on mount
         updateServerStatus();
+        
+        // Then run every 30 seconds
         const interval = setInterval(updateServerStatus, SERVER_HEALTH_CHECK_INTERVAL);
+        
+        // Cleanup interval on unmount
         return () => clearInterval(interval);
-    }, [updateServerStatus]);
+    }, [updateServerStatus]); // Re-run if updateServerStatus changes (which it won't often)
  
     const handleServerSelect = useCallback((server) => {
         onServerSelect(server);

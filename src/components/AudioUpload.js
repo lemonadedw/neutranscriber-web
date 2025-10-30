@@ -1,7 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_AUDIO_TYPES, SUPPORTED_AUDIO_EXTENSIONS, MAX_FILE_SIZE } from '../utils/constants';
 
+/**
+ * AudioUpload Component
+ * 
+ * - Handles audio file upload with JWT authentication
+ * - Shows user info and logout button
+ * - Sends JWT token in Authorization header
+ * - Validates files before upload
+ */
 const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -62,25 +74,68 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
     processFile(event.dataTransfer.files[0]);
   }, [processFile]);
 
-  const getUploadZoneClasses = () => {
-    if (disabled) return 'upload-zone-disabled';
-    if (isDragOver) return 'upload-zone-dragging';
-    if (selectedFile) return 'upload-zone-active';
-    
-    return 'upload-zone border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 dark:hover:bg-blue-900/20 cursor-pointer hover:shadow-lg dark:hover:shadow-slate-900/20';
+  /**
+   * Handle logout
+   * Clears auth context and redirects to login
+   */
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
-  const getIconClasses = () => {
-    const baseClasses = "inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300";
-
-    if (isDragOver) return `${baseClasses} bg-emerald-100 text-emerald-600 dark:bg-emerald-800/30 dark:text-emerald-400`;
-    if (selectedFile) return `${baseClasses} bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400`;
-
-    return `${baseClasses} bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-800/30 dark:group-hover:text-blue-400`;
+  // Determine upload zone styling based on state
+  const getUploadZoneState = () => {
+    if (disabled) return { zoneClass: 'upload-zone-disabled', iconClass: 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500' };
+    if (isDragOver) return { zoneClass: 'upload-zone-dragging', iconClass: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-800/30 dark:text-emerald-400' };
+    if (selectedFile) return { zoneClass: 'upload-zone-active', iconClass: 'bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400' };
+    return { zoneClass: 'upload-zone border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 dark:hover:bg-blue-900/20 cursor-pointer hover:shadow-lg dark:hover:shadow-slate-900/20', iconClass: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-800/30 dark:group-hover:text-blue-400' };
   };
+
+  const uploadState = getUploadZoneState();
 
   return (
     <div className="space-y-6">
+      {/* User Info Header */}
+      {user && (
+        <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            {/* User Avatar */}
+            {user.picture_url ? (
+              <img
+                src={user.picture_url}
+                alt={user.name}
+                className="w-10 h-10 rounded-full border-2 border-blue-300 dark:border-blue-600"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                {user.name?.charAt(0) || 'U'}
+              </div>
+            )}
+
+            {/* User Details */}
+            <div>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                Welcome back!
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                {user.email}
+              </p>
+            </div>
+          </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 
+                       border border-slate-300 dark:border-slate-600 rounded-lg
+                       hover:bg-slate-50 dark:hover:bg-slate-700
+                       transition-colors duration-200 text-sm font-medium"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+
       {/* Upload Section Header */}
       <div className="text-center">
         <h2 className="text-2xl sm:text-3xl header-primary mb-3">
@@ -90,8 +145,6 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
           Drop your audio file here or click to browse
         </p>
       </div>
-
-      {/* Upload Zone */}
       <div
         className={`relative group transition-all duration-300 ${isDragOver ? 'scale-105' : ''}`}
         onDragOver={handleDragOver}
@@ -107,9 +160,9 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
 
-        <div className={getUploadZoneClasses()}>
+        <div className={uploadState.zoneClass}>
           {/* Upload Icon */}
-          <div className={getIconClasses()}>
+          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300 ${uploadState.iconClass}`}>
             {selectedFile ? (
               <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />

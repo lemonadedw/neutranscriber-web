@@ -3,16 +3,33 @@
  */
 
 /**
- * Format timestamp to readable date string
- * @param {string} timestamp - ISO timestamp string
- * @returns {string} Formatted date (e.g., "Jan 15, 02:30 PM")
+ * Format timestamp to readable date string (converted to local time)
+ * @param {string} timestamp - ISO timestamp string (UTC, from backend)
+ * @returns {string} Formatted date in local timezone (e.g., "Jan 15, 02:30 PM")
  */
 export const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleString('en-US', {
+  // Ensure the timestamp has timezone info (append Z if not present)
+  // Backend sends timestamps without Z, so we must add it to signal UTC
+  let isoString = timestamp;
+  if (timestamp && !timestamp.includes('Z') && !timestamp.includes('+')) {
+    isoString = timestamp + 'Z';  // Append 'Z' to indicate UTC
+  }
+  
+  // Parse the UTC timestamp
+  const date = new Date(isoString);
+  
+  // If parsing failed, return the original timestamp
+  if (isNaN(date.getTime())) {
+    return timestamp;
+  }
+  
+  // toLocaleString() automatically converts UTC to browser's local timezone
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: true  // Ensure 12-hour format with AM/PM
   });
 };
 

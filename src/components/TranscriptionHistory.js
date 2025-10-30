@@ -1,35 +1,67 @@
 import React, { useState, useCallback } from 'react';
 import { useHistory } from '../contexts/HistoryContext';
-import { formatDate, formatFileSize, removeFileExtension } from '../utils/helpers';
+import { useAuth } from '../contexts/AuthContext';
+import { formatDate } from '../utils/helpers';
+import { downloadMidiFile } from '../utils/downloadUtils';
 
 const TranscriptionHistory = () => {
   const { history, clearHistory, removeTranscription } = useHistory();
+  const { accessToken } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
 
-  const handleDownload = useCallback((midiFilename, fileName, serverUrl) => {
-    if (midiFilename && serverUrl) {
-      // Use the original server URL, not the current one
-      const downloadUrl = `${serverUrl}/api/download_midi/${midiFilename}`;
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${removeFileExtension(fileName)}.mid`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  // Show success/error messages
+  const showNotification = useCallback((msg, type = 'success') => {
+    setNotification({ msg, type });
+    setTimeout(() => setNotification(null), 3000);
   }, []);
 
-  const handleClearHistory = useCallback(() => {
-    if (window.confirm('Are you sure you want to clear all transcription history?')) {
-      clearHistory();
+  // Download MIDI file with authentication
+  const handleDownload = useCallback(async (midiFilename, fileName) => {
+    if (!midiFilename || !accessToken) {
+      console.error('Missing required download parameters');
+      showNotification('❌ Download failed: Missing authentication', 'error');
+      return;
     }
-  }, [clearHistory]);
 
-  const handleRemoveItem = useCallback((id, fileName) => {
-    if (window.confirm(`Remove "${fileName}" from history?`)) {
-      removeTranscription(id);
+    try {
+      await downloadMidiFile(midiFilename, fileName, accessToken);
+      showNotification(`✅ Downloaded: ${fileName}`, 'success');
+    } catch (error) {
+      console.error('Download error:', error);
+      showNotification(`❌ Download failed: ${error.message}`, 'error');
     }
-  }, [removeTranscription]);
+  }, [accessToken, showNotification]);
+
+  // Handle clear history
+  const handleClearHistory = useCallback(async () => {
+    if (!window.confirm('Clear all transcription history?')) {
+      return;
+    }
+    
+    const result = await clearHistory();
+    
+    if (result.success) {
+      showNotification('✅ History cleared', 'success');
+    } else {
+      showNotification(`❌ ${result.error}`, 'error');
+    }
+  }, [clearHistory, showNotification]);
+
+  // Handle remove single item
+  const handleRemoveItem = useCallback(async (id, fileName) => {
+    if (!window.confirm(`Remove "${fileName}" from history?`)) {
+      return;
+    }
+    
+    const result = await removeTranscription(id);
+
+    if (result.success) {
+      showNotification(`✅ Removed "${fileName}"`, 'success');
+    } else {
+      showNotification(`❌ ${result.error}`, 'error');
+    }
+  }, [removeTranscription, showNotification]);
 
   const closeSidebar = useCallback(() => {
     setIsSidebarOpen(false);
@@ -73,9 +105,9 @@ const TranscriptionHistory = () => {
                 {history.length > 0 && (
                   <button
                     onClick={handleClearHistory}
-                    className="p-1.5 sm:p-2 border-none rounded-md sm:rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-red-50 dark:bg-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 hover:scale-110"
-                    title="Clear all history"
-                  >
+                className="p-1.5 sm:p-2 border-none rounded-md sm:rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-red-50 dark:bg-red-900/40 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 hover:scale-110"
+                title="Clear all history"
+              >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="sm:w-5 sm:h-5">
                       <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                     </svg>
@@ -83,7 +115,7 @@ const TranscriptionHistory = () => {
                 )}
                 <button
                   onClick={closeSidebar}
-                  className="p-1.5 sm:p-2 border-none rounded-md sm:rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-110 transition-colors duration-300"
+                  className="p-1.5 sm:p-2 border-none rounded-md sm:rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-110"
                   title="Close sidebar"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="sm:w-5 sm:h-5">
@@ -106,7 +138,7 @@ const TranscriptionHistory = () => {
                   {history.map((item, index) => (
                     <div
                       key={item.id}
-                      className="mx-2 sm:mx-3 mb-1.5 sm:mb-2 bg-white/70 dark:bg-slate-800/70 rounded-lg sm:rounded-xl border border-white/30 dark:border-slate-700/30 transition-all duration-300 animate-slide-in-from-right hover:bg-white/90 dark:hover:bg-slate-800/90 hover:transform hover:-translate-x-1 hover:shadow-lg transition-colors duration-300"
+                      className="mx-2 sm:mx-3 mb-1.5 sm:mb-2 bg-white/70 dark:bg-slate-800/70 rounded-lg sm:rounded-xl border border-white/30 dark:border-slate-700/30 transition-all duration-300 animate-slide-in-from-right hover:bg-white/90 dark:hover:bg-slate-800/90 hover:transform hover:-translate-x-1 hover:shadow-lg"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <div className="p-3 sm:p-4">
@@ -127,15 +159,9 @@ const TranscriptionHistory = () => {
                               </span>
                               <span className="flex items-center gap-1 sm:gap-1.5 text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="opacity-60 sm:w-3 sm:h-3">
-                                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z" />
-                                </svg>
-                                {formatFileSize(item.fileSize)}
-                              </span>
-                              <span className="flex items-center gap-1 sm:gap-1.5 text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="opacity-60 sm:w-3 sm:h-3">
                                   <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
                                 </svg>
-                                {item.processingTime}s
+                                {item.processingTime ? `${item.processingTime}s` : 'N/A'}
                               </span>
                               {/* Add server information */}
                               <span className="flex items-center gap-1 sm:gap-1.5 text-xs text-gray-600 dark:text-gray-400 transition-colors duration-300">
@@ -149,7 +175,7 @@ const TranscriptionHistory = () => {
                         </div>
                         <div className="flex gap-1.5 sm:gap-2 justify-end">
                           <button
-                            onClick={() => handleDownload(item.midiFilename, item.fileName, item.serverUrl)}
+                            onClick={() => handleDownload(item.midiFilename, item.fileName)}
                             className="p-1.5 sm:p-2 border-none rounded-md cursor-pointer transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/40"
                             title="Download MIDI file"
                           >
@@ -174,6 +200,15 @@ const TranscriptionHistory = () => {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white font-semibold text-sm shadow-lg z-[200] ${
+          notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`}>
+          {notification.msg}
         </div>
       )}
     </>

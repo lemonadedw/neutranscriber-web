@@ -1,11 +1,29 @@
+/**
+ * App.js
+ * 
+ * Main application component
+ * Wraps everything with:
+ * 1. GoogleOAuthProvider - Enables Google OAuth login
+ * 2. BrowserRouter - Enables routing (login page, dashboard, etc)
+ * 3. AuthProvider - Makes authentication state available everywhere
+ */
+
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoginPage } from './components/GoogleLogin';
+
+// Import existing components
 import AudioUpload from './components/AudioUpload';
 import TranscriptionHistory from './components/TranscriptionHistory';
 import ServerSelector from './components/ServerSelector';
 import ThemeToggle from './components/ThemeToggle';
 import { useTranscription } from './hooks/useTranscription';
 import { useHistory } from './contexts/HistoryContext';
-import { transcriptionAPI, updateApiBaseURL } from './services/api';
+import { updateApiBaseURL } from './services/api';
+import { downloadMidiFile } from './utils/downloadUtils';
 import { DEFAULT_SERVERS, SERVER_STATUS, STATUS_STYLES } from './utils/constants';
 
 // UI Components
@@ -188,12 +206,18 @@ const SuccessState = ({ result, onDownload, onStartOver }) => (
   </div>
 );
 
-function App() {
+/**
+ * Dashboard Component
+ * Main page after user logs in
+ * Shows audio upload and transcription history
+ */
+function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedServer, setSelectedServer] = useState(DEFAULT_SERVERS[0]); // Default to first server
+  const [selectedServer, setSelectedServer] = useState(DEFAULT_SERVERS[0]);
+  const { accessToken } = useAuth();
+  const { reloadHistory } = useHistory();
 
   const { transcribeAudio, resetTranscription, isTranscribing, progress, result, error } = useTranscription();
-  const { addTranscription } = useHistory();
 
   const handleFileSelect = (file) => {
     setSelectedFile(file);
@@ -211,10 +235,13 @@ function App() {
     }
   };
 
-  const handleDownload = () => {
-    if (result && result.midi_filename) {
-      const downloadUrl = transcriptionAPI.downloadMidi(result.midi_filename);
-      window.open(downloadUrl, '_blank');
+  const handleDownload = async () => {
+    if (result && result.midi_filename && accessToken) {
+      try {
+        await downloadMidiFile(result.midi_filename, selectedFile.name, accessToken);
+      } catch (error) {
+        alert(`Download failed: ${error.message}`);
+      }
     }
   };
 
@@ -228,18 +255,46 @@ function App() {
     updateApiBaseURL(selectedServer.url);
   }, [selectedServer.url]);
 
-  // Add successful transcription to history
+  // Save successful transcription to backend database
   useEffect(() => {
     if (result && result.status === 'SUCCESS' && selectedFile) {
-      addTranscription({
-        ...result,
-        fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        serverUrl: selectedServer.url,
-        serverName: selectedServer.name
-      });
+      const saveToBackend = async () => {
+        try {
+          const accessToken = localStorage.getItem('access_token');
+          if (!accessToken) return;
+
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:9000/api';
+          const payload = {
+            transcription_id: result.transcription_id,
+            original_filename: selectedFile.name,
+            midi_filename: result.midi_filename,
+            processing_time: result.transcription_time,
+            status: result.status
+          };
+          
+          const response = await fetch(`${apiUrl}/user/transcriptions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            // Reload history from backend to avoid duplicates
+            await reloadHistory();
+          } else {
+            console.warn('Failed to save transcription to backend:', response.status);
+          }
+        } catch (error) {
+          console.error('Error saving transcription to backend:', error);
+        }
+      };
+
+      saveToBackend();
     }
-  }, [result, selectedFile, selectedServer, addTranscription]);
+  }, [result, selectedFile, reloadHistory]);
 
   // Determine which state to render
   const renderTranscriptionState = () => {
@@ -300,6 +355,64 @@ function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Root App Component
+ * 
+ * Wraps the entire application with:
+ * 1. GoogleOAuthProvider - Initialize Google OAuth with client ID
+ * 2. Router - Enable client-side routing
+ * 3. AuthProvider - Make auth context available everywhere
+ * 
+ * Routes:
+ * - /login → LoginPage (unauthenticated users)
+ * - /dashboard → Dashboard (protected, authenticated only)
+ * - / → Redirect to /dashboard if logged in, /login if not
+ */
+function App() {
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center text-red-700 p-8 bg-white rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold mb-4">⚠️ Configuration Error</h1>
+          <p>Missing REACT_APP_GOOGLE_CLIENT_ID in .env file</p>
+          <p className="text-sm mt-2">Please add your Google Client ID to neutranscriber-web/.env</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <Router>
+        <AuthProvider>
+          <Routes>
+            {/* Login page - available to everyone */}
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Dashboard - protected route, only for authenticated users */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Default route - redirect to dashboard */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+            {/* Catch all - redirect to dashboard */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </AuthProvider>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 

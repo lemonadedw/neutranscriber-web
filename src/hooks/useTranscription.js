@@ -9,6 +9,7 @@ export const useTranscription = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const currentTaskIdRef = useRef(null);
+  const transcriptionIdRef = useRef(null);
   const processedEventsRef = useRef(new Set()); // De-duplicate events from multiple workers
 
   useEffect(() => {
@@ -40,7 +41,10 @@ export const useTranscription = () => {
           break;
 
         case 'SUCCESS':
-          setResult(payload);
+          setResult({
+            ...payload,
+            transcription_id: transcriptionIdRef.current
+          });
           setProgress(STATUS_MESSAGES.COMPLETE);
           setIsTranscribing(false);
           currentTaskIdRef.current = null;
@@ -53,7 +57,7 @@ export const useTranscription = () => {
           break;
 
         default:
-          console.warn('Unknown transcription state:', state);
+          break;
       }
     });
 
@@ -71,17 +75,16 @@ export const useTranscription = () => {
     processedEventsRef.current.clear(); // Clear processed events for new task
 
     try {
-      const { task_id } = await transcriptionAPI.uploadAndTranscribe(file);
+      const { task_id, transcription_id } = await transcriptionAPI.uploadAndTranscribe(file);
       currentTaskIdRef.current = task_id;
+      transcriptionIdRef.current = transcription_id;
       
       // Join the task-specific room to ensure this client only receives updates for this task
-      // This prevents information leakage from other users' transcription tasks
       websocketService.joinTask(task_id);
       
       setProgress(STATUS_MESSAGES.TRANSCRIBING);
     } catch (err) {
-      console.error('Upload failed:', err);
-      setError(err.response?.data?.error || 'Failed to upload file');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to upload file');
       setIsTranscribing(false);
       currentTaskIdRef.current = null;
     }
@@ -98,6 +101,7 @@ export const useTranscription = () => {
     setResult(null);
     setError(null);
     currentTaskIdRef.current = null;
+    transcriptionIdRef.current = null;
     processedEventsRef.current.clear(); // Clear processed events on reset
   }, []);
 

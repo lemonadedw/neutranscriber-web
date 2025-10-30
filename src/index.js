@@ -1,22 +1,17 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import App from './App';
 import { HistoryProvider } from './contexts/HistoryContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
-// Initialize WebSocket connection immediately
-import { websocketService } from './services/websocket';
-console.log('Initializing WebSocket from index.js');
-websocketService.connect();
-
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
     <ThemeProvider>
       <HistoryProvider>
         <App />
       </HistoryProvider>
     </ThemeProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );

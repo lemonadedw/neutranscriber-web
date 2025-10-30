@@ -22,14 +22,13 @@ export const SERVER_STATUS = {
     CHECKING: 'checking'
 };
 
-// Application status messages
+// Status messages for transcription progress (used in useTranscription hook)
 export const STATUS_MESSAGES = {
-    SUCCESS: 'Transcription completed successfully.',
-    FAILURE: 'Transcription failed. Please try again.',
     UPLOADING: 'Uploading audio file...',
     TRANSCRIBING: 'Transcribing audio...',
     PROCESSING: 'Processing...',
-    COMPLETE: 'Transcription complete!'
+    COMPLETE: 'Transcription complete!',
+    FAILURE: 'Transcription failed. Please try again.'
 };
 
 export const SERVER_STATUS_DISPLAY = {
