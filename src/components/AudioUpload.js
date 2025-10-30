@@ -15,6 +15,7 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const fileInputRef = useRef(null);
 
   // Reset file input when selectedFile becomes null
@@ -23,6 +24,11 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
       fileInputRef.current.value = '';
     }
   }, [selectedFile]);
+
+  // Reset image error when user changes
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [user]);
 
   const validateFile = useCallback((file) => {
     if (!file) return { isValid: false, error: 'No file selected' };
@@ -100,11 +106,14 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
         <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
           <div className="flex items-center gap-3">
             {/* User Avatar */}
-            {user.picture_url ? (
+            {user.picture && !imageLoadError ? (
               <img
-                src={user.picture_url}
+                src={user.picture}
                 alt={user.name}
-                className="w-10 h-10 rounded-full border-2 border-blue-300 dark:border-blue-600"
+                crossOrigin="anonymous"
+                loading="lazy"
+                onError={() => setImageLoadError(true)}
+                className="w-10 h-10 rounded-full border-2 border-blue-300 dark:border-blue-600 object-cover"
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
