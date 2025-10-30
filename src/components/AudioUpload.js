@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_AUDIO_TYPES, SUPPORTED_AUDIO_EXTENSIONS, MAX_FILE_SIZE } from '../utils/constants';
+import { transcriptionAPI } from '../services/api';
 
 /**
  * AudioUpload Component
@@ -16,6 +17,7 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
   const { user, logout } = useAuth();
   const [isDragOver, setIsDragOver] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   // Reset file input when selectedFile becomes null
@@ -28,6 +30,57 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
   // Reset image error when user changes
   useEffect(() => {
     setImageLoadError(false);
+  }, [user]);
+
+  // Fetch profile picture as blob and convert to data URL
+  useEffect(() => {
+    // Cleanup: revoke old blob URL when component unmounts or user changes
+    return () => {
+      if (profileImageUrl) {
+        URL.revokeObjectURL(profileImageUrl);
+      }
+    };
+  }, [profileImageUrl]);
+
+  // Fetch profile picture when user changes
+  useEffect(() => {
+    if (!user) {
+      // User logged out, clear profile image
+      setProfileImageUrl(null);
+      setImageLoadError(false);
+      return;
+    }
+
+    const fetchProfilePicture = async () => {
+      try {
+        setImageLoadError(false);
+        const accessToken = localStorage.getItem('access_token');
+        // Add cache-busting query param with user ID to force fresh fetch
+        const url = `${transcriptionAPI.getCurrentBaseURL()}/auth/user/profile-picture?user=${user.id}&t=${Date.now()}`;
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          },
+          cache: 'no-cache'
+        });
+
+        if (!response.ok) {
+          setImageLoadError(true);
+          setProfileImageUrl(null);
+          return;
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setProfileImageUrl(blobUrl);
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+        setImageLoadError(true);
+        setProfileImageUrl(null);
+      }
+    };
+
+    fetchProfilePicture();
   }, [user]);
 
   const validateFile = useCallback((file) => {
@@ -106,13 +159,10 @@ const AudioUpload = ({ onFileSelect, disabled, selectedFile }) => {
         <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
           <div className="flex items-center gap-3">
             {/* User Avatar */}
-            {user.picture && !imageLoadError ? (
+            {profileImageUrl && !imageLoadError ? (
               <img
-                src={user.picture}
+                src={profileImageUrl}
                 alt={user.name}
-                crossOrigin="anonymous"
-                loading="lazy"
-                onError={() => setImageLoadError(true)}
                 className="w-10 h-10 rounded-full border-2 border-blue-300 dark:border-blue-600 object-cover"
               />
             ) : (
